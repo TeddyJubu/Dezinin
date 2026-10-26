@@ -35,12 +35,19 @@ function fieldRow(toggle) {
   }
   return node;
 }
+function isSectionBoundary(node) {
+  return node.matches("[data-section-toggle]") || Boolean(node.querySelector("[data-section-toggle]"));
+}
 function lockSections() {
+  document.querySelectorAll("[data-section-toggle][data-section-locked]").forEach((toggle) => {
+    toggle.removeAttribute("data-section-locked");
+    toggle.removeAttribute("inert");
+  });
   document.querySelectorAll("[data-section-toggle]").forEach((toggle) => {
     const hidden = toggle.getAttribute("aria-checked") === "false" || toggle.getAttribute("data-edit-locked") === "true";
     let sibling = fieldRow(toggle).nextElementSibling;
     while (sibling) {
-      if (sibling.querySelector("[data-section-toggle]")) break;
+      if (isSectionBoundary(sibling)) break;
       if (hidden) {
         if (sibling.getAttribute("data-section-locked") !== "true") {
           sibling.setAttribute("data-section-locked", "true");
@@ -79,6 +86,27 @@ function rewriteTree(root) {
     img.style.display = "block";
   });
 }
+function repairPreviewHash() {
+  const { hash, pathname, search } = window.location;
+  if (!hash.startsWith("#/~/")) return;
+  const rest = hash.slice("#/~".length);
+  let next = "";
+  if (rest === "" || rest === "/") next = "#/~";
+  else if (rest.startsWith("//")) next = `#/~${rest.replace(/^\/+/, "/")}`;
+  if (!next || next === hash) return;
+  history.replaceState(history.state, "", `${pathname}${search}${next}`);
+  window.dispatchEvent(new HashChangeEvent("hashchange"));
+}
+function keepSingletonBackInEditor(event) {
+  const target = event.target;
+  if (!(target instanceof Element)) return;
+  const button = target.closest("button[aria-label='Back to Home'], button[aria-label='Back to Site']");
+  if (!button || !window.location.hash.startsWith("#/collections/edit/")) return;
+  event.preventDefault();
+  event.stopPropagation();
+  if (history.length > 1) history.back();
+  else window.location.hash = "#/";
+}
 function installDezininBrand(cms) {
   if (typeof document === "undefined") return cms;
   const branded = window;
@@ -109,6 +137,9 @@ function installDezininBrand(cms) {
   });
   observer.observe(document.body, { subtree: true, childList: true, characterData: true });
   document.addEventListener("click", () => window.setTimeout(lockSections, 0));
+  document.addEventListener("click", keepSingletonBackInEditor, true);
+  repairPreviewHash();
+  window.addEventListener("hashchange", repairPreviewHash);
   return cms;
 }
 
@@ -246,8 +277,7 @@ var config_default = defineConfig({
         path: "content/site",
         format: "json",
         ui: {
-          allowedActions: { create: false, delete: false },
-          router: () => "/"
+          allowedActions: { create: false, delete: false }
         },
         fields: [
           { type: "string", name: "metaTitle", label: "Meta title", required: true },
@@ -315,8 +345,7 @@ var config_default = defineConfig({
         path: "content/home",
         format: "json",
         ui: {
-          allowedActions: { create: false, delete: false },
-          router: () => "/"
+          allowedActions: { create: false, delete: false }
         },
         fields: [
           ...sectionToggle("showHero", "Hero"),
@@ -361,7 +390,13 @@ var config_default = defineConfig({
             list: true,
             ui: { itemProps: (item) => ({ label: item?.title }) },
             fields: [
-              { type: "string", name: "youtubeId", label: "YouTube id", required: true },
+              {
+                type: "string",
+                name: "youtubeId",
+                label: "YouTube link",
+                description: "Paste a full YouTube link. A video id still works.",
+                required: true
+              },
               { type: "string", name: "title", label: "Title" }
             ]
           },

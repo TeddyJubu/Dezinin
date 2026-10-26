@@ -86,6 +86,29 @@ function rewriteTree(root: Node | null) {
     img.style.display = "block";
   });
 }
+function repairPreviewHash() {
+  const { hash, pathname, search } = window.location;
+  if (!hash.startsWith("#/~/")) return;
+  const rest = hash.slice("#/~".length);
+  let next = "";
+  if (rest === "" || rest === "/") next = "#/~";
+  else if (rest.startsWith("//")) next = `#/~${rest.replace(/^\/+/, "/")}`;
+  if (!next || next === hash) return;
+  history.replaceState(history.state, "", `${pathname}${search}${next}`);
+  window.dispatchEvent(new HashChangeEvent("hashchange"));
+}
+
+function keepSingletonBackInEditor(event: Event) {
+  const target = event.target;
+  if (!(target instanceof Element)) return;
+  const button = target.closest("button[aria-label='Back to Home'], button[aria-label='Back to Site']");
+  if (!button || !window.location.hash.startsWith("#/collections/edit/")) return;
+  event.preventDefault();
+  event.stopPropagation();
+  if (history.length > 1) history.back();
+  else window.location.hash = "#/";
+}
+
 export function installDezininBrand<T>(cms: T): T {
   if (typeof document === "undefined") return cms;
   const branded = window as Window & { __dezininBrand?: boolean };
@@ -116,5 +139,8 @@ export function installDezininBrand<T>(cms: T): T {
   });
   observer.observe(document.body, { subtree: true, childList: true, characterData: true });
   document.addEventListener("click", () => window.setTimeout(lockSections, 0));
+  document.addEventListener("click", keepSingletonBackInEditor, true);
+  repairPreviewHash();
+  window.addEventListener("hashchange", repairPreviewHash);
   return cms;
 }

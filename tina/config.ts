@@ -60,7 +60,6 @@ export default defineConfig({
         format: "json",
         ui: {
           allowedActions: { create: false, delete: false },
-          router: () => "/",
         },
         fields: [
           { type: "string", name: "metaTitle", label: "Meta title", required: true },
@@ -129,7 +128,6 @@ export default defineConfig({
         format: "json",
         ui: {
           allowedActions: { create: false, delete: false },
-          router: () => "/",
         },
         fields: [
           ...sectionToggle("showHero", "Hero"),

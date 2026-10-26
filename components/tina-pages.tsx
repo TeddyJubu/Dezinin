@@ -1,13 +1,17 @@
 "use client";
 
+import { hashFromQuery } from "@tinacms/bridge/metadata";
 import Link from "next/link";
 import { useTina } from "tinacms/dist/react";
 import { Footer, Header, ThemeToggle } from "@/components/chrome";
-import { Shell, type HomeContent, type NewsletterContent, type PageContent, type SiteContent, type TinaQuery } from "@/components/content";
 import { ContactSection } from "@/components/contact-section";
+import { ArrowUpRight, Shell, mediaUrl, type HomeContent, type NewsletterContent, type PageContent, type SiteContent, type TinaQuery } from "@/components/content";
 import { HomeView } from "@/components/home-view";
-import { mediaUrl } from "@/components/content";
-import { ArrowUpRight } from "@/components/content";
+
+function primaryForm(query: TinaQuery) {
+  const id = hashFromQuery(JSON.stringify({ query: query.query, variables: query.variables }));
+  return { ...query, experimental___selectFormByFormId: () => id };
+}
 
 export function HomeClient({
   home,
@@ -18,9 +22,9 @@ export function HomeClient({
   site: TinaQuery;
   newsletters: TinaQuery;
 }) {
-  const homeResult = useTina(home);
   const siteResult = useTina(site);
   const newsletterResult = useTina(newsletters);
+  const homeResult = useTina(primaryForm(home));
   const connection = newsletterResult.data.newsletterConnection as {
     edges?: { node?: NewsletterContent }[] | null;
   };
@@ -41,8 +45,8 @@ export function HomeClient({
 }
 
 export function ContactClient({ home, site }: { home: TinaQuery; site: TinaQuery }) {
-  const homeResult = useTina(home);
   const siteResult = useTina(site);
+  const homeResult = useTina(primaryForm(home));
   const siteData = siteResult.data.site as SiteContent;
   const homeData = homeResult.data.home as HomeContent;
   return (
@@ -58,8 +62,8 @@ export function ContactClient({ home, site }: { home: TinaQuery; site: TinaQuery
 }
 
 export function PageClient({ page, site }: { page: TinaQuery; site: TinaQuery }) {
-  const pageResult = useTina(page);
   const siteResult = useTina(site);
+  const pageResult = useTina(primaryForm(page));
   const siteData = siteResult.data.site as SiteContent;
   const data = pageResult.data.page as PageContent;
   return (
@@ -100,8 +104,8 @@ export function NewsletterClient({
   newsletter: TinaQuery;
   site: TinaQuery;
 }) {
-  const newsletterResult = useTina(newsletter);
   const siteResult = useTina(site);
+  const newsletterResult = useTina(primaryForm(newsletter));
   const siteData = siteResult.data.site as SiteContent;
   const data = newsletterResult.data.newsletter as NewsletterContent;
   const pdf = mediaUrl(data.pdf);
