@@ -65,8 +65,6 @@ type Query {
   siteConnection(before: String, after: String, first: Float, last: Float, sort: String, filter: SiteFilter): SiteConnection!
   home(relativePath: String): Home!
   homeConnection(before: String, after: String, first: Float, last: Float, sort: String, filter: HomeFilter): HomeConnection!
-  newsletter(relativePath: String): Newsletter!
-  newsletterConnection(before: String, after: String, first: Float, last: Float, sort: String, filter: NewsletterFilter): NewsletterConnection!
   page(relativePath: String): Page!
   pageConnection(before: String, after: String, first: Float, last: Float, sort: String, filter: PageFilter): PageConnection!
 }
@@ -75,7 +73,6 @@ input DocumentFilter {
   user: UserFilter
   site: SiteFilter
   home: HomeFilter
-  newsletter: NewsletterFilter
   page: PageFilter
 }
 
@@ -102,7 +99,7 @@ type Collection {
   documents(before: String, after: String, first: Float, last: Float, sort: String, filter: DocumentFilter, folder: String): DocumentConnection!
 }
 
-union DocumentNode = User | Site | Home | Newsletter | Page | Folder
+union DocumentNode = User | Site | Home | Page | Folder
 
 type UserUsersPassword {
   value: String!
@@ -242,11 +239,6 @@ type SiteConnection implements Connection {
   edges: [SiteConnectionEdges]
 }
 
-type HomeHeadlines {
-  title: String!
-  subtitle: String
-}
-
 type HomeProjects {
   number: String
   title: String!
@@ -284,9 +276,6 @@ type Home implements Node & Document {
   showHero: Boolean
   lockHero: Boolean
   heroVideo: String
-  showLookbook: Boolean
-  lockLookbook: Boolean
-  headlines: [HomeHeadlines]
   showPartners: Boolean
   lockPartners: Boolean
   experienceTitle: String
@@ -314,11 +303,6 @@ type Home implements Node & Document {
 input BooleanFilter {
   eq: Boolean
   exists: Boolean
-}
-
-input HomeHeadlinesFilter {
-  title: StringFilter
-  subtitle: StringFilter
 }
 
 input HomeProjectsFilter {
@@ -358,9 +342,6 @@ input HomeFilter {
   showHero: BooleanFilter
   lockHero: BooleanFilter
   heroVideo: ImageFilter
-  showLookbook: BooleanFilter
-  lockLookbook: BooleanFilter
-  headlines: HomeHeadlinesFilter
   showPartners: BooleanFilter
   lockPartners: BooleanFilter
   experienceTitle: StringFilter
@@ -391,46 +372,6 @@ type HomeConnection implements Connection {
   pageInfo: PageInfo!
   totalCount: Float!
   edges: [HomeConnectionEdges]
-}
-
-type Newsletter implements Node & Document {
-  title: String!
-  order: Float
-  cover: String
-  pdf: String
-  summary: String
-  id: ID!
-  _sys: SystemInfo!
-  _values: JSON!
-}
-
-input NumberFilter {
-  lt: Float
-  lte: Float
-  gte: Float
-  gt: Float
-  eq: Float
-  exists: Boolean
-  in: [Float]
-}
-
-input NewsletterFilter {
-  title: StringFilter
-  order: NumberFilter
-  cover: ImageFilter
-  pdf: ImageFilter
-  summary: StringFilter
-}
-
-type NewsletterConnectionEdges {
-  cursor: String!
-  node: Newsletter
-}
-
-type NewsletterConnection implements Connection {
-  pageInfo: PageInfo!
-  totalCount: Float!
-  edges: [NewsletterConnectionEdges]
 }
 
 type Page implements Node & Document {
@@ -482,8 +423,6 @@ type Mutation {
   createSite(relativePath: String!, params: SiteMutation!): Site!
   updateHome(relativePath: String!, params: HomeMutation!): Home!
   createHome(relativePath: String!, params: HomeMutation!): Home!
-  updateNewsletter(relativePath: String!, params: NewsletterMutation!): Newsletter!
-  createNewsletter(relativePath: String!, params: NewsletterMutation!): Newsletter!
   updatePage(relativePath: String!, params: PageMutation!): Page!
   createPage(relativePath: String!, params: PageMutation!): Page!
 }
@@ -492,7 +431,6 @@ input DocumentUpdateMutation {
   user: UserMutation
   site: SiteMutation
   home: HomeMutation
-  newsletter: NewsletterMutation
   page: PageMutation
   relativePath: String
 }
@@ -501,7 +439,6 @@ input DocumentMutation {
   user: UserMutation
   site: SiteMutation
   home: HomeMutation
-  newsletter: NewsletterMutation
   page: PageMutation
 }
 
@@ -556,11 +493,6 @@ input SiteMutation {
   copyright: String
 }
 
-input HomeHeadlinesMutation {
-  title: String
-  subtitle: String
-}
-
 input HomeProjectsMutation {
   number: String
   title: String
@@ -598,9 +530,6 @@ input HomeMutation {
   showHero: Boolean
   lockHero: Boolean
   heroVideo: String
-  showLookbook: Boolean
-  lockLookbook: Boolean
-  headlines: [HomeHeadlinesMutation]
   showPartners: Boolean
   lockPartners: Boolean
   experienceTitle: String
@@ -620,14 +549,6 @@ input HomeMutation {
   showContact: Boolean
   lockContact: Boolean
   contact: HomeContactMutation
-}
-
-input NewsletterMutation {
-  title: String
-  order: Float
-  cover: String
-  pdf: String
-  summary: String
 }
 
 input PageMutation {

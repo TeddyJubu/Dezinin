@@ -92,8 +92,6 @@ export type Query = {
   siteConnection: SiteConnection;
   home: Home;
   homeConnection: HomeConnection;
-  newsletter: Newsletter;
-  newsletterConnection: NewsletterConnection;
   page: Page;
   pageConnection: PageConnection;
 };
@@ -171,21 +169,6 @@ export type QueryHomeConnectionArgs = {
 };
 
 
-export type QueryNewsletterArgs = {
-  relativePath?: InputMaybe<Scalars['String']['input']>;
-};
-
-
-export type QueryNewsletterConnectionArgs = {
-  before?: InputMaybe<Scalars['String']['input']>;
-  after?: InputMaybe<Scalars['String']['input']>;
-  first?: InputMaybe<Scalars['Float']['input']>;
-  last?: InputMaybe<Scalars['Float']['input']>;
-  sort?: InputMaybe<Scalars['String']['input']>;
-  filter?: InputMaybe<NewsletterFilter>;
-};
-
-
 export type QueryPageArgs = {
   relativePath?: InputMaybe<Scalars['String']['input']>;
 };
@@ -204,7 +187,6 @@ export type DocumentFilter = {
   user?: InputMaybe<UserFilter>;
   site?: InputMaybe<SiteFilter>;
   home?: InputMaybe<HomeFilter>;
-  newsletter?: InputMaybe<NewsletterFilter>;
   page?: InputMaybe<PageFilter>;
 };
 
@@ -245,7 +227,7 @@ export type CollectionDocumentsArgs = {
   folder?: InputMaybe<Scalars['String']['input']>;
 };
 
-export type DocumentNode = User | Site | Home | Newsletter | Page | Folder;
+export type DocumentNode = User | Site | Home | Page | Folder;
 
 export type UserUsersPassword = {
   __typename?: 'UserUsersPassword';
@@ -397,12 +379,6 @@ export type SiteConnection = Connection & {
   edges?: Maybe<Array<Maybe<SiteConnectionEdges>>>;
 };
 
-export type HomeHeadlines = {
-  __typename?: 'HomeHeadlines';
-  title: Scalars['String']['output'];
-  subtitle?: Maybe<Scalars['String']['output']>;
-};
-
 export type HomeProjects = {
   __typename?: 'HomeProjects';
   number?: Maybe<Scalars['String']['output']>;
@@ -445,9 +421,6 @@ export type Home = Node & Document & {
   showHero?: Maybe<Scalars['Boolean']['output']>;
   lockHero?: Maybe<Scalars['Boolean']['output']>;
   heroVideo?: Maybe<Scalars['String']['output']>;
-  showLookbook?: Maybe<Scalars['Boolean']['output']>;
-  lockLookbook?: Maybe<Scalars['Boolean']['output']>;
-  headlines?: Maybe<Array<Maybe<HomeHeadlines>>>;
   showPartners?: Maybe<Scalars['Boolean']['output']>;
   lockPartners?: Maybe<Scalars['Boolean']['output']>;
   experienceTitle?: Maybe<Scalars['String']['output']>;
@@ -475,11 +448,6 @@ export type Home = Node & Document & {
 export type BooleanFilter = {
   eq?: InputMaybe<Scalars['Boolean']['input']>;
   exists?: InputMaybe<Scalars['Boolean']['input']>;
-};
-
-export type HomeHeadlinesFilter = {
-  title?: InputMaybe<StringFilter>;
-  subtitle?: InputMaybe<StringFilter>;
 };
 
 export type HomeProjectsFilter = {
@@ -519,9 +487,6 @@ export type HomeFilter = {
   showHero?: InputMaybe<BooleanFilter>;
   lockHero?: InputMaybe<BooleanFilter>;
   heroVideo?: InputMaybe<ImageFilter>;
-  showLookbook?: InputMaybe<BooleanFilter>;
-  lockLookbook?: InputMaybe<BooleanFilter>;
-  headlines?: InputMaybe<HomeHeadlinesFilter>;
   showPartners?: InputMaybe<BooleanFilter>;
   lockPartners?: InputMaybe<BooleanFilter>;
   experienceTitle?: InputMaybe<StringFilter>;
@@ -554,49 +519,6 @@ export type HomeConnection = Connection & {
   pageInfo: PageInfo;
   totalCount: Scalars['Float']['output'];
   edges?: Maybe<Array<Maybe<HomeConnectionEdges>>>;
-};
-
-export type Newsletter = Node & Document & {
-  __typename?: 'Newsletter';
-  title: Scalars['String']['output'];
-  order?: Maybe<Scalars['Float']['output']>;
-  cover?: Maybe<Scalars['String']['output']>;
-  pdf?: Maybe<Scalars['String']['output']>;
-  summary?: Maybe<Scalars['String']['output']>;
-  id: Scalars['ID']['output'];
-  _sys: SystemInfo;
-  _values: Scalars['JSON']['output'];
-};
-
-export type NumberFilter = {
-  lt?: InputMaybe<Scalars['Float']['input']>;
-  lte?: InputMaybe<Scalars['Float']['input']>;
-  gte?: InputMaybe<Scalars['Float']['input']>;
-  gt?: InputMaybe<Scalars['Float']['input']>;
-  eq?: InputMaybe<Scalars['Float']['input']>;
-  exists?: InputMaybe<Scalars['Boolean']['input']>;
-  in?: InputMaybe<Array<InputMaybe<Scalars['Float']['input']>>>;
-};
-
-export type NewsletterFilter = {
-  title?: InputMaybe<StringFilter>;
-  order?: InputMaybe<NumberFilter>;
-  cover?: InputMaybe<ImageFilter>;
-  pdf?: InputMaybe<ImageFilter>;
-  summary?: InputMaybe<StringFilter>;
-};
-
-export type NewsletterConnectionEdges = {
-  __typename?: 'NewsletterConnectionEdges';
-  cursor: Scalars['String']['output'];
-  node?: Maybe<Newsletter>;
-};
-
-export type NewsletterConnection = Connection & {
-  __typename?: 'NewsletterConnection';
-  pageInfo: PageInfo;
-  totalCount: Scalars['Float']['output'];
-  edges?: Maybe<Array<Maybe<NewsletterConnectionEdges>>>;
 };
 
 export type Page = Node & Document & {
@@ -652,8 +574,6 @@ export type Mutation = {
   createSite: Site;
   updateHome: Home;
   createHome: Home;
-  updateNewsletter: Newsletter;
-  createNewsletter: Newsletter;
   updatePage: Page;
   createPage: Page;
 };
@@ -733,18 +653,6 @@ export type MutationCreateHomeArgs = {
 };
 
 
-export type MutationUpdateNewsletterArgs = {
-  relativePath: Scalars['String']['input'];
-  params: NewsletterMutation;
-};
-
-
-export type MutationCreateNewsletterArgs = {
-  relativePath: Scalars['String']['input'];
-  params: NewsletterMutation;
-};
-
-
 export type MutationUpdatePageArgs = {
   relativePath: Scalars['String']['input'];
   params: PageMutation;
@@ -760,7 +668,6 @@ export type DocumentUpdateMutation = {
   user?: InputMaybe<UserMutation>;
   site?: InputMaybe<SiteMutation>;
   home?: InputMaybe<HomeMutation>;
-  newsletter?: InputMaybe<NewsletterMutation>;
   page?: InputMaybe<PageMutation>;
   relativePath?: InputMaybe<Scalars['String']['input']>;
 };
@@ -769,7 +676,6 @@ export type DocumentMutation = {
   user?: InputMaybe<UserMutation>;
   site?: InputMaybe<SiteMutation>;
   home?: InputMaybe<HomeMutation>;
-  newsletter?: InputMaybe<NewsletterMutation>;
   page?: InputMaybe<PageMutation>;
 };
 
@@ -824,11 +730,6 @@ export type SiteMutation = {
   copyright?: InputMaybe<Scalars['String']['input']>;
 };
 
-export type HomeHeadlinesMutation = {
-  title?: InputMaybe<Scalars['String']['input']>;
-  subtitle?: InputMaybe<Scalars['String']['input']>;
-};
-
 export type HomeProjectsMutation = {
   number?: InputMaybe<Scalars['String']['input']>;
   title?: InputMaybe<Scalars['String']['input']>;
@@ -866,9 +767,6 @@ export type HomeMutation = {
   showHero?: InputMaybe<Scalars['Boolean']['input']>;
   lockHero?: InputMaybe<Scalars['Boolean']['input']>;
   heroVideo?: InputMaybe<Scalars['String']['input']>;
-  showLookbook?: InputMaybe<Scalars['Boolean']['input']>;
-  lockLookbook?: InputMaybe<Scalars['Boolean']['input']>;
-  headlines?: InputMaybe<Array<InputMaybe<HomeHeadlinesMutation>>>;
   showPartners?: InputMaybe<Scalars['Boolean']['input']>;
   lockPartners?: InputMaybe<Scalars['Boolean']['input']>;
   experienceTitle?: InputMaybe<Scalars['String']['input']>;
@@ -888,14 +786,6 @@ export type HomeMutation = {
   showContact?: InputMaybe<Scalars['Boolean']['input']>;
   lockContact?: InputMaybe<Scalars['Boolean']['input']>;
   contact?: InputMaybe<HomeContactMutation>;
-};
-
-export type NewsletterMutation = {
-  title?: InputMaybe<Scalars['String']['input']>;
-  order?: InputMaybe<Scalars['Float']['input']>;
-  cover?: InputMaybe<Scalars['String']['input']>;
-  pdf?: InputMaybe<Scalars['String']['input']>;
-  summary?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type PageMutation = {
@@ -973,11 +863,6 @@ export type BooleanFilter = {
   exists?: boolean | null | undefined;
 };
 
-export type HomeHeadlinesFilter = {
-  title?: StringFilter | null | undefined;
-  subtitle?: StringFilter | null | undefined;
-};
-
 export type HomeProjectsFilter = {
   number?: StringFilter | null | undefined;
   title?: StringFilter | null | undefined;
@@ -1015,9 +900,6 @@ export type HomeFilter = {
   showHero?: BooleanFilter | null | undefined;
   lockHero?: BooleanFilter | null | undefined;
   heroVideo?: ImageFilter | null | undefined;
-  showLookbook?: BooleanFilter | null | undefined;
-  lockLookbook?: BooleanFilter | null | undefined;
-  headlines?: HomeHeadlinesFilter | null | undefined;
   showPartners?: BooleanFilter | null | undefined;
   lockPartners?: BooleanFilter | null | undefined;
   experienceTitle?: StringFilter | null | undefined;
@@ -1039,24 +921,6 @@ export type HomeFilter = {
   contact?: HomeContactFilter | null | undefined;
 };
 
-export type NumberFilter = {
-  lt?: number | null | undefined;
-  lte?: number | null | undefined;
-  gte?: number | null | undefined;
-  gt?: number | null | undefined;
-  eq?: number | null | undefined;
-  exists?: boolean | null | undefined;
-  in?: Array<number | null | undefined> | null | undefined;
-};
-
-export type NewsletterFilter = {
-  title?: StringFilter | null | undefined;
-  order?: NumberFilter | null | undefined;
-  cover?: ImageFilter | null | undefined;
-  pdf?: ImageFilter | null | undefined;
-  summary?: StringFilter | null | undefined;
-};
-
 export type PageFilter = {
   kicker?: StringFilter | null | undefined;
   title?: StringFilter | null | undefined;
@@ -1072,9 +936,7 @@ export type UserPartsFragment = { __typename: 'User', users: Array<{ __typename:
 
 export type SitePartsFragment = { __typename: 'Site', metaTitle: string, metaDescription: string | null, logo: string | null, logoCompact: string | null, ctaLabel: string | null, ctaHref: string | null, footerBlurb: string | null, copyright: string | null, navLinks: Array<{ __typename: 'SiteNavLinks', label: string, href: string } | null> | null, footerColumns: Array<{ __typename: 'SiteFooterColumns', title: string | null, links: Array<{ __typename: 'SiteFooterColumnsLinks', label: string | null, href: string | null } | null> | null } | null> | null, socials: Array<{ __typename: 'SiteSocials', label: string | null, href: string | null, icon: string | null } | null> | null };
 
-export type HomePartsFragment = { __typename: 'Home', showHero: boolean | null, lockHero: boolean | null, heroVideo: string | null, showLookbook: boolean | null, lockLookbook: boolean | null, showPartners: boolean | null, lockPartners: boolean | null, experienceTitle: string | null, partners: Array<string | null> | null, showProjects: boolean | null, lockProjects: boolean | null, filters: Array<string | null> | null, showGallery: boolean | null, lockGallery: boolean | null, galleryTitle: string | null, showFaq: boolean | null, lockFaq: boolean | null, faqTitle: string | null, showContact: boolean | null, lockContact: boolean | null, headlines: Array<{ __typename: 'HomeHeadlines', title: string, subtitle: string | null } | null> | null, projects: Array<{ __typename: 'HomeProjects', number: string | null, title: string, categories: Array<string | null> | null, image: string | null, summary: string | null } | null> | null, videos: Array<{ __typename: 'HomeVideos', youtubeId: string, title: string | null } | null> | null, faqs: Array<{ __typename: 'HomeFaqs', question: string, answer: string } | null> | null, contact: { __typename: 'HomeContact', kicker: string | null, heading: string | null, email: string | null, formTitle: string | null, interestLabel: string | null, interests: Array<string | null> | null, submitLabel: string | null, namePlaceholder: string | null, companyPlaceholder: string | null, emailPlaceholder: string | null, phonePlaceholder: string | null, messagePlaceholder: string | null } | null };
-
-export type NewsletterPartsFragment = { __typename: 'Newsletter', title: string, order: number | null, cover: string | null, pdf: string | null, summary: string | null };
+export type HomePartsFragment = { __typename: 'Home', showHero: boolean | null, lockHero: boolean | null, heroVideo: string | null, showPartners: boolean | null, lockPartners: boolean | null, experienceTitle: string | null, partners: Array<string | null> | null, showProjects: boolean | null, lockProjects: boolean | null, filters: Array<string | null> | null, showGallery: boolean | null, lockGallery: boolean | null, galleryTitle: string | null, showFaq: boolean | null, lockFaq: boolean | null, faqTitle: string | null, showContact: boolean | null, lockContact: boolean | null, projects: Array<{ __typename: 'HomeProjects', number: string | null, title: string, categories: Array<string | null> | null, image: string | null, summary: string | null } | null> | null, videos: Array<{ __typename: 'HomeVideos', youtubeId: string, title: string | null } | null> | null, faqs: Array<{ __typename: 'HomeFaqs', question: string, answer: string } | null> | null, contact: { __typename: 'HomeContact', kicker: string | null, heading: string | null, email: string | null, formTitle: string | null, interestLabel: string | null, interests: Array<string | null> | null, submitLabel: string | null, namePlaceholder: string | null, companyPlaceholder: string | null, emailPlaceholder: string | null, phonePlaceholder: string | null, messagePlaceholder: string | null } | null };
 
 export type PagePartsFragment = { __typename: 'Page', kicker: string | null, title: string, body: string | null, image: string | null, primaryCtaLabel: string | null, primaryCtaHref: string | null, secondaryCtaLabel: string | null, secondaryCtaHref: string | null };
 
@@ -1121,7 +983,7 @@ export type HomeQueryVariables = Exact<{
 }>;
 
 
-export type HomeQuery = { home: { __typename: 'Home', id: string, showHero: boolean | null, lockHero: boolean | null, heroVideo: string | null, showLookbook: boolean | null, lockLookbook: boolean | null, showPartners: boolean | null, lockPartners: boolean | null, experienceTitle: string | null, partners: Array<string | null> | null, showProjects: boolean | null, lockProjects: boolean | null, filters: Array<string | null> | null, showGallery: boolean | null, lockGallery: boolean | null, galleryTitle: string | null, showFaq: boolean | null, lockFaq: boolean | null, faqTitle: string | null, showContact: boolean | null, lockContact: boolean | null, _sys: { filename: string, basename: string, hasReferences: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string }, headlines: Array<{ __typename: 'HomeHeadlines', title: string, subtitle: string | null } | null> | null, projects: Array<{ __typename: 'HomeProjects', number: string | null, title: string, categories: Array<string | null> | null, image: string | null, summary: string | null } | null> | null, videos: Array<{ __typename: 'HomeVideos', youtubeId: string, title: string | null } | null> | null, faqs: Array<{ __typename: 'HomeFaqs', question: string, answer: string } | null> | null, contact: { __typename: 'HomeContact', kicker: string | null, heading: string | null, email: string | null, formTitle: string | null, interestLabel: string | null, interests: Array<string | null> | null, submitLabel: string | null, namePlaceholder: string | null, companyPlaceholder: string | null, emailPlaceholder: string | null, phonePlaceholder: string | null, messagePlaceholder: string | null } | null } };
+export type HomeQuery = { home: { __typename: 'Home', id: string, showHero: boolean | null, lockHero: boolean | null, heroVideo: string | null, showPartners: boolean | null, lockPartners: boolean | null, experienceTitle: string | null, partners: Array<string | null> | null, showProjects: boolean | null, lockProjects: boolean | null, filters: Array<string | null> | null, showGallery: boolean | null, lockGallery: boolean | null, galleryTitle: string | null, showFaq: boolean | null, lockFaq: boolean | null, faqTitle: string | null, showContact: boolean | null, lockContact: boolean | null, _sys: { filename: string, basename: string, hasReferences: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string }, projects: Array<{ __typename: 'HomeProjects', number: string | null, title: string, categories: Array<string | null> | null, image: string | null, summary: string | null } | null> | null, videos: Array<{ __typename: 'HomeVideos', youtubeId: string, title: string | null } | null> | null, faqs: Array<{ __typename: 'HomeFaqs', question: string, answer: string } | null> | null, contact: { __typename: 'HomeContact', kicker: string | null, heading: string | null, email: string | null, formTitle: string | null, interestLabel: string | null, interests: Array<string | null> | null, submitLabel: string | null, namePlaceholder: string | null, companyPlaceholder: string | null, emailPlaceholder: string | null, phonePlaceholder: string | null, messagePlaceholder: string | null } | null } };
 
 export type HomeConnectionQueryVariables = Exact<{
   before?: string | null | undefined;
@@ -1133,26 +995,7 @@ export type HomeConnectionQueryVariables = Exact<{
 }>;
 
 
-export type HomeConnectionQuery = { homeConnection: { totalCount: number, pageInfo: { hasPreviousPage: boolean, hasNextPage: boolean, startCursor: string, endCursor: string }, edges: Array<{ cursor: string, node: { __typename: 'Home', id: string, showHero: boolean | null, lockHero: boolean | null, heroVideo: string | null, showLookbook: boolean | null, lockLookbook: boolean | null, showPartners: boolean | null, lockPartners: boolean | null, experienceTitle: string | null, partners: Array<string | null> | null, showProjects: boolean | null, lockProjects: boolean | null, filters: Array<string | null> | null, showGallery: boolean | null, lockGallery: boolean | null, galleryTitle: string | null, showFaq: boolean | null, lockFaq: boolean | null, faqTitle: string | null, showContact: boolean | null, lockContact: boolean | null, _sys: { filename: string, basename: string, hasReferences: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string }, headlines: Array<{ __typename: 'HomeHeadlines', title: string, subtitle: string | null } | null> | null, projects: Array<{ __typename: 'HomeProjects', number: string | null, title: string, categories: Array<string | null> | null, image: string | null, summary: string | null } | null> | null, videos: Array<{ __typename: 'HomeVideos', youtubeId: string, title: string | null } | null> | null, faqs: Array<{ __typename: 'HomeFaqs', question: string, answer: string } | null> | null, contact: { __typename: 'HomeContact', kicker: string | null, heading: string | null, email: string | null, formTitle: string | null, interestLabel: string | null, interests: Array<string | null> | null, submitLabel: string | null, namePlaceholder: string | null, companyPlaceholder: string | null, emailPlaceholder: string | null, phonePlaceholder: string | null, messagePlaceholder: string | null } | null } | null } | null> | null } };
-
-export type NewsletterQueryVariables = Exact<{
-  relativePath: string;
-}>;
-
-
-export type NewsletterQuery = { newsletter: { __typename: 'Newsletter', id: string, title: string, order: number | null, cover: string | null, pdf: string | null, summary: string | null, _sys: { filename: string, basename: string, hasReferences: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } };
-
-export type NewsletterConnectionQueryVariables = Exact<{
-  before?: string | null | undefined;
-  after?: string | null | undefined;
-  first?: number | null | undefined;
-  last?: number | null | undefined;
-  sort?: string | null | undefined;
-  filter?: NewsletterFilter | null | undefined;
-}>;
-
-
-export type NewsletterConnectionQuery = { newsletterConnection: { totalCount: number, pageInfo: { hasPreviousPage: boolean, hasNextPage: boolean, startCursor: string, endCursor: string }, edges: Array<{ cursor: string, node: { __typename: 'Newsletter', id: string, title: string, order: number | null, cover: string | null, pdf: string | null, summary: string | null, _sys: { filename: string, basename: string, hasReferences: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string } } | null } | null> | null } };
+export type HomeConnectionQuery = { homeConnection: { totalCount: number, pageInfo: { hasPreviousPage: boolean, hasNextPage: boolean, startCursor: string, endCursor: string }, edges: Array<{ cursor: string, node: { __typename: 'Home', id: string, showHero: boolean | null, lockHero: boolean | null, heroVideo: string | null, showPartners: boolean | null, lockPartners: boolean | null, experienceTitle: string | null, partners: Array<string | null> | null, showProjects: boolean | null, lockProjects: boolean | null, filters: Array<string | null> | null, showGallery: boolean | null, lockGallery: boolean | null, galleryTitle: string | null, showFaq: boolean | null, lockFaq: boolean | null, faqTitle: string | null, showContact: boolean | null, lockContact: boolean | null, _sys: { filename: string, basename: string, hasReferences: boolean | null, breadcrumbs: Array<string>, path: string, relativePath: string, extension: string }, projects: Array<{ __typename: 'HomeProjects', number: string | null, title: string, categories: Array<string | null> | null, image: string | null, summary: string | null } | null> | null, videos: Array<{ __typename: 'HomeVideos', youtubeId: string, title: string | null } | null> | null, faqs: Array<{ __typename: 'HomeFaqs', question: string, answer: string } | null> | null, contact: { __typename: 'HomeContact', kicker: string | null, heading: string | null, email: string | null, formTitle: string | null, interestLabel: string | null, interests: Array<string | null> | null, submitLabel: string | null, namePlaceholder: string | null, companyPlaceholder: string | null, emailPlaceholder: string | null, phonePlaceholder: string | null, messagePlaceholder: string | null } | null } | null } | null> | null } };
 
 export type PageQueryVariables = Exact<{
   relativePath: string;
@@ -1227,13 +1070,6 @@ export const HomePartsFragmentDoc = gql`
   showHero
   lockHero
   heroVideo
-  showLookbook
-  lockLookbook
-  headlines {
-    __typename
-    title
-    subtitle
-  }
   showPartners
   lockPartners
   experienceTitle
@@ -1282,16 +1118,6 @@ export const HomePartsFragmentDoc = gql`
     phonePlaceholder
     messagePlaceholder
   }
-}
-    `;
-export const NewsletterPartsFragmentDoc = gql`
-    fragment NewsletterParts on Newsletter {
-  __typename
-  title
-  order
-  cover
-  pdf
-  summary
 }
     `;
 export const PagePartsFragmentDoc = gql`
@@ -1478,63 +1304,6 @@ export const HomeConnectionDocument = gql`
   }
 }
     ${HomePartsFragmentDoc}`;
-export const NewsletterDocument = gql`
-    query newsletter($relativePath: String!) {
-  newsletter(relativePath: $relativePath) {
-    ... on Document {
-      _sys {
-        filename
-        basename
-        hasReferences
-        breadcrumbs
-        path
-        relativePath
-        extension
-      }
-      id
-    }
-    ...NewsletterParts
-  }
-}
-    ${NewsletterPartsFragmentDoc}`;
-export const NewsletterConnectionDocument = gql`
-    query newsletterConnection($before: String, $after: String, $first: Float, $last: Float, $sort: String, $filter: NewsletterFilter) {
-  newsletterConnection(
-    before: $before
-    after: $after
-    first: $first
-    last: $last
-    sort: $sort
-    filter: $filter
-  ) {
-    pageInfo {
-      hasPreviousPage
-      hasNextPage
-      startCursor
-      endCursor
-    }
-    totalCount
-    edges {
-      cursor
-      node {
-        ... on Document {
-          _sys {
-            filename
-            basename
-            hasReferences
-            breadcrumbs
-            path
-            relativePath
-            extension
-          }
-          id
-        }
-        ...NewsletterParts
-      }
-    }
-  }
-}
-    ${NewsletterPartsFragmentDoc}`;
 export const PageDocument = gql`
     query page($relativePath: String!) {
   page(relativePath: $relativePath) {
@@ -1612,12 +1381,6 @@ export type Requester<C= {}> = <R, V>(doc: DocumentNode, vars?: V, options?: C) 
       },
     homeConnection(variables?: HomeConnectionQueryVariables, options?: C): Promise<{data: HomeConnectionQuery, errors?: { message: string, locations: { line: number, column: number }[], path: string[] }[], variables: HomeConnectionQueryVariables, query: string}> {
         return requester<{data: HomeConnectionQuery, errors?: { message: string, locations: { line: number, column: number }[], path: string[] }[], variables: HomeConnectionQueryVariables, query: string}, HomeConnectionQueryVariables>(HomeConnectionDocument, variables, options);
-      },
-    newsletter(variables: NewsletterQueryVariables, options?: C): Promise<{data: NewsletterQuery, errors?: { message: string, locations: { line: number, column: number }[], path: string[] }[], variables: NewsletterQueryVariables, query: string}> {
-        return requester<{data: NewsletterQuery, errors?: { message: string, locations: { line: number, column: number }[], path: string[] }[], variables: NewsletterQueryVariables, query: string}, NewsletterQueryVariables>(NewsletterDocument, variables, options);
-      },
-    newsletterConnection(variables?: NewsletterConnectionQueryVariables, options?: C): Promise<{data: NewsletterConnectionQuery, errors?: { message: string, locations: { line: number, column: number }[], path: string[] }[], variables: NewsletterConnectionQueryVariables, query: string}> {
-        return requester<{data: NewsletterConnectionQuery, errors?: { message: string, locations: { line: number, column: number }[], path: string[] }[], variables: NewsletterConnectionQueryVariables, query: string}, NewsletterConnectionQueryVariables>(NewsletterConnectionDocument, variables, options);
       },
     page(variables: PageQueryVariables, options?: C): Promise<{data: PageQuery, errors?: { message: string, locations: { line: number, column: number }[], path: string[] }[], variables: PageQueryVariables, query: string}> {
         return requester<{data: PageQuery, errors?: { message: string, locations: { line: number, column: number }[], path: string[] }[], variables: PageQueryVariables, query: string}, PageQueryVariables>(PageDocument, variables, options);

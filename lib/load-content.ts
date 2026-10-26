@@ -70,12 +70,6 @@ export async function loadPage(relativePath: string) {
 }
 
 export async function loadNewsletters() {
-  if (useDatabase()) {
-    return fromDatabase(["newsletters"], () => tina().then((client) => client.queries.newsletterConnection({ first: 100 })));
-  }
-  if (process.env.TINA_PUBLIC_IS_LOCAL === "true") {
-    return (await tina()).queries.newsletterConnection({ first: 100 });
-  }
   const dir = path.join(contentRoot, "newsletters");
   const edges = fs
     .readdirSync(dir)
@@ -92,12 +86,6 @@ export async function loadNewsletters() {
 
 export async function loadNewsletter(slug: string) {
   const relativePath = `${slug}.json`;
-  if (useDatabase()) {
-    return fromDatabase(["newsletter", relativePath], () => tina().then((client) => client.queries.newsletter({ relativePath })));
-  }
-  if (process.env.TINA_PUBLIC_IS_LOCAL === "true") {
-    return (await tina()).queries.newsletter({ relativePath });
-  }
   const node = readJson<Record<string, unknown>>(`newsletters/${relativePath}`);
   return staticQuery("newsletter", { ...node, _sys: { filename: slug } }, relativePath);
 }

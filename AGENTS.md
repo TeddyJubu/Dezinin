@@ -5,6 +5,7 @@
 - Authenticate the production admin with Auth.js on a self-hosted backend, and do not use paid TinaCloud.
 - White-label the admin with the Dezinin brand identity and remove TinaCMS branding.
 - Keep version control in a local git repository and commit after every change. Do not push unless asked.
+- Keep admin Back navigation inside the editor. Common settings and Main page must not share one preview route, and Back must return to the editor menu.
 
 ## Learned Workspace Facts
 
@@ -12,3 +13,5 @@
 - Production is the Vercel project `dezinin` on the Triple Dev's projects team, at https://dezinin-five.vercel.app, with the editor at `/admin`.
 - TinaCMS is the CMS. Production uses Auth.js (`next-auth` and `tinacms-authjs`) for admin login and Upstash Redis (`upstash-redis-level`) as the content index. The build is `tinacms build && node scripts/brand-admin.mjs && next build`.
 - The original site with the intended layout and effects is https://dummy.dezinin.com/.
+- Admin collection labels are "Common settings" (`site`) and "Main page" (`home`). Internal names and paths stay `content/site` and `content/home`. Do not set `ui.global`; Tina titles that sidebar group "Site" and uses it for Media Manager and Users.
+- The homepage newsletter/lookbook section and the CMS Newsletters nav are removed. Newsletter JSON remains in `content/newsletters`, and existing lookbook URLs can still open.

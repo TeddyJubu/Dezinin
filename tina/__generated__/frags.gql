@@ -49,13 +49,6 @@ fragment HomeParts on Home {
   showHero
   lockHero
   heroVideo
-  showLookbook
-  lockLookbook
-  headlines {
-    __typename
-    title
-    subtitle
-  }
   showPartners
   lockPartners
   experienceTitle
@@ -104,15 +97,6 @@ fragment HomeParts on Home {
     phonePlaceholder
     messagePlaceholder
   }
-}
-
-fragment NewsletterParts on Newsletter {
-  __typename
-  title
-  order
-  cover
-  pdf
-  summary
 }
 
 fragment PageParts on Page {

@@ -101,7 +101,7 @@ function repairPreviewHash() {
 function keepSingletonBackInEditor(event: Event) {
   const target = event.target;
   if (!(target instanceof Element)) return;
-  const button = target.closest("button[aria-label='Back to Home'], button[aria-label='Back to Site']");
+  const button = target.closest("button[aria-label='Back to Main page'], button[aria-label='Back to Common settings']");
   if (!button || !window.location.hash.startsWith("#/collections/edit/")) return;
   event.preventDefault();
   event.stopPropagation();

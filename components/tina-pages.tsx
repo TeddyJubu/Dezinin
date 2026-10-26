@@ -13,31 +13,14 @@ function primaryForm(query: TinaQuery) {
   return { ...query, experimental___selectFormByFormId: () => id };
 }
 
-export function HomeClient({
-  home,
-  site,
-  newsletters,
-}: {
-  home: TinaQuery;
-  site: TinaQuery;
-  newsletters: TinaQuery;
-}) {
+export function HomeClient({ home, site }: { home: TinaQuery; site: TinaQuery }) {
   const siteResult = useTina(site);
-  const newsletterResult = useTina(newsletters);
   const homeResult = useTina(primaryForm(home));
-  const connection = newsletterResult.data.newsletterConnection as {
-    edges?: { node?: NewsletterContent }[] | null;
-  };
-  const items = (connection?.edges || [])
-    .map((edge) => edge?.node)
-    .filter((node): node is NewsletterContent => Boolean(node))
-    .sort((a, b) => (a.order || 0) - (b.order || 0));
-
   const siteData = siteResult.data.site as SiteContent;
   return (
     <Shell>
       <Header site={siteData} />
-      <HomeView home={homeResult.data.home as HomeContent} site={siteData} newsletters={items} />
+      <HomeView home={homeResult.data.home as HomeContent} site={siteData} />
       <Footer site={siteData} />
       <ThemeToggle />
     </Shell>
