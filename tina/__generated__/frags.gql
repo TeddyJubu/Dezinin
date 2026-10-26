@@ -1,0 +1,128 @@
+fragment UserParts on User {
+  __typename
+  users {
+    __typename
+    username
+    name
+    email
+    password {
+      value
+      passwordChangeRequired
+    }
+  }
+}
+
+fragment SiteParts on Site {
+  __typename
+  metaTitle
+  metaDescription
+  logo
+  logoCompact
+  navLinks {
+    __typename
+    label
+    href
+  }
+  ctaLabel
+  ctaHref
+  footerBlurb
+  footerColumns {
+    __typename
+    title
+    links {
+      __typename
+      label
+      href
+    }
+  }
+  socials {
+    __typename
+    label
+    href
+    icon
+  }
+  copyright
+}
+
+fragment HomeParts on Home {
+  __typename
+  showHero
+  lockHero
+  heroVideo
+  showLookbook
+  lockLookbook
+  headlines {
+    __typename
+    title
+    subtitle
+  }
+  showPartners
+  lockPartners
+  experienceTitle
+  partners
+  showProjects
+  lockProjects
+  filters
+  projects {
+    __typename
+    number
+    title
+    categories
+    image
+    summary
+  }
+  showGallery
+  lockGallery
+  galleryTitle
+  videos {
+    __typename
+    youtubeId
+    title
+  }
+  showFaq
+  lockFaq
+  faqTitle
+  faqs {
+    __typename
+    question
+    answer
+  }
+  showContact
+  lockContact
+  contact {
+    __typename
+    kicker
+    heading
+    email
+    formTitle
+    interestLabel
+    interests
+    submitLabel
+    namePlaceholder
+    companyPlaceholder
+    emailPlaceholder
+    phonePlaceholder
+    messagePlaceholder
+  }
+}
+
+fragment NewsletterParts on Newsletter {
+  __typename
+  title
+  order
+  cover
+  pdf
+  summary
+}
+
+fragment PageParts on Page {
+  __typename
+  kicker
+  title
+  body
+  image
+  primaryCtaLabel
+  primaryCtaHref
+  secondaryCtaLabel
+  secondaryCtaHref
+}

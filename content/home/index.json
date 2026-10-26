@@ -1,0 +1,173 @@
+{
+  "showHero": true,
+  "lockHero": false,
+  "heroVideo": "/video/hypetown_hero.mp4",
+  "showLookbook": false,
+  "lockLookbook": false,
+  "headlines": [
+    {
+      "title": "NEWSLETTER",
+      "subtitle": "check out the trend"
+    },
+    {
+      "title": "MOODBOARD",
+      "subtitle": "of the season"
+    },
+    {
+      "title": "FORECAST",
+      "subtitle": "of the trend"
+    }
+  ],
+  "showPartners": true,
+  "lockPartners": false,
+  "experienceTitle": "EXPERIENCE WITH BRANDS",
+  "partners": [
+    "/icons/partners/BRANDS LOGO-01.svg",
+    "/icons/partners/BRANDS LOGO-02.svg",
+    "/icons/partners/BRANDS LOGO-03.svg",
+    "/icons/partners/BRANDS LOGO-04.svg",
+    "/icons/partners/BRANDS LOGO-06.svg",
+    "/icons/partners/BRANDS LOGO-07.svg",
+    "/icons/partners/BRANDS LOGO-10.svg",
+    "/icons/partners/BRANDS LOGO-11.svg",
+    "/icons/partners/BRANDS LOGO-12.svg",
+    "/icons/partners/BRANDS LOGO-15.svg",
+    "/icons/partners/BRANDS LOGO-16.svg",
+    "/icons/partners/BRANDS LOGO-18.svg",
+    "/icons/partners/BRANDS LOGO-19.svg",
+    "/icons/partners/BRANDS LOGO-20.svg",
+    "/icons/partners/BRANDS LOGO-21.svg",
+    "/icons/partners/BRANDS LOGO-22.svg",
+    "/icons/partners/BRANDS LOGO-23.svg",
+    "/icons/partners/BRANDS LOGO-24.svg",
+    "/icons/partners/LOGO-05 plazaItalia.svg",
+    "/icons/partners/LOGO-08 NewYorker.svg",
+    "/icons/partners/LOGO-09 Reitmans.svg",
+    "/icons/partners/LOGO-13 Fynch.svg",
+    "/icons/partners/LOGO-14 colins.svg",
+    "/icons/partners/LOGO-17 cecil.svg"
+  ],
+  "showProjects": true,
+  "lockProjects": false,
+  "filters": [
+    "ALL",
+    "GRAPHICS & DESIGN",
+    "3D & DEVELOPMENT",
+    "SUPPLY CHAIN-PRODUCTION"
+  ],
+  "projects": [
+    {
+      "number": "01",
+      "title": "PROJECT 1",
+      "categories": [
+        "GRAPHICS & DESIGN"
+      ],
+      "image": "/images/L_GRAPHICS_DESIGN.jpg",
+      "summary": "Print, graphics and artwork development built around a single seasonal story, from first sketch to production-ready separations."
+    },
+    {
+      "number": "02",
+      "title": "PROJECT 2",
+      "categories": [
+        "3D & DEVELOPMENT",
+        "SUPPLY CHAIN-PRODUCTION"
+      ],
+      "image": "/images/L_3D_DEVELOPMENT.jpg",
+      "summary": "Digital prototyping and fit iteration in 3D, handed straight to the mill so the first physical sample is already the right one."
+    },
+    {
+      "number": "03",
+      "title": "PROJECT 3",
+      "categories": [
+        "SUPPLY CHAIN-PRODUCTION"
+      ],
+      "image": "/images/L_SUPPLY_CHAIN.jpg",
+      "summary": "Sourcing, costing and production planning across a vetted mill network, with traceability at every step of the chain."
+    },
+    {
+      "number": "04",
+      "title": "PROJECT 4",
+      "categories": [
+        "GRAPHICS & DESIGN",
+        "3D & DEVELOPMENT"
+      ],
+      "image": "/images/L_PRODUCTION.jpg",
+      "summary": "A full range rebuilt end to end: graphics direction, 3D development and material research delivered as one package."
+    }
+  ],
+  "showGallery": true,
+  "lockGallery": false,
+  "galleryTitle": "GLIMPSE INTO THE GALLERY",
+  "videos": [
+    {
+      "youtubeId": "hiOIQKb_nOU",
+      "title": "short 1"
+    },
+    {
+      "youtubeId": "X8m77ZGgHrk",
+      "title": "short 2"
+    },
+    {
+      "youtubeId": "5k00pzCwzxc",
+      "title": "short 3"
+    },
+    {
+      "youtubeId": "iKu2ezaLeaU",
+      "title": "short 4"
+    },
+    {
+      "youtubeId": "Yyq1o63JWvo",
+      "title": "short 5"
+    },
+    {
+      "youtubeId": "mbRlARNzlgw",
+      "title": "short 6"
+    }
+  ],
+  "showFaq": true,
+  "lockFaq": false,
+  "faqTitle": "FREQUENTLY ASKED QUESTIONS",
+  "faqs": [
+    {
+      "question": "What exactly is a Dezinin newsletter?",
+      "answer": "Each newsletter is a seasonal trend and design lookbook we put together for our partners, covering a specific product range (like SS27 Men’s Jersey or AW27 Outerwear) with imagery, print/graphic direction, and styling notes you can browse online or download as a PDF."
+    },
+    {
+      "question": "Can we request a custom design or newsletter for our brand?",
+      "answer": "Yes. Use the Enquiry button on any newsletter or the contact form below to tell us about your range, and our design team will scope a tailored deck for your brand."
+    },
+    {
+      "question": "How long does a custom design request take?",
+      "answer": "Turnaround depends on scope, but most seasonal decks are ready within 2–4 weeks of kickoff. We’ll give you a firm timeline once we understand your requirements."
+    },
+    {
+      "question": "How do I download or share a lookbook?",
+      "answer": "Open any newsletter card and use the Download Design button to save it as a PDF named after the collection, ready to share internally or with your buyers."
+    },
+    {
+      "question": "How can I get in touch about a project?",
+      "answer": "Use the contact form at the bottom of this page, or the Enquiry button inside any newsletter, and someone from our team will follow up shortly."
+    }
+  ],
+  "showContact": true,
+  "lockContact": false,
+  "contact": {
+    "kicker": "CONNECT WITH US!",
+    "heading": "TURN YOUR VISION INTO AN EXPERIENCE.",
+    "email": "info@dezinin.com",
+    "formTitle": "LET'S TALK.",
+    "interestLabel": "I'm interested in",
+    "interests": [
+      "SUPPLY CHAIN-PRODUCTION",
+      "3D & DEVELOPMENT",
+      "GRAPHICS & DESIGN",
+      "OTHER"
+    ],
+    "submitLabel": "SEND MESSAGE",
+    "namePlaceholder": "Full name",
+    "companyPlaceholder": "Company Name",
+    "emailPlaceholder": "Email",
+    "phonePlaceholder": "Phone",
+    "messagePlaceholder": "Tell us more about your project!"
+  }
+}

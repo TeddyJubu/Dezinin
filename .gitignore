@@ -1,0 +1,12 @@
+node_modules
+.next
+.tina
+*.log
+.DS_Store
+.vercel
+media-source
+.env
+.env.*
+content/users/
+tsconfig.tsbuildinfo
+.cursor/hooks/state/

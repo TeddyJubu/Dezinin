@@ -1,0 +1,26 @@
+.font-robotoSlab {
+  font-family: var(--font-robotoSlab), serif;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  min-height: 100vh;
+}
+
+@keyframes partner-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.partner-marquee {
+  animation: partner-scroll 40s linear infinite;
+}
+
+.partner-marquee:hover {
+  animation-play-state: paused;
+}

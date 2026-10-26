@@ -1,0 +1,4 @@
+{
+  "framework": "nextjs",
+  "buildCommand": "tinacms build && node scripts/brand-admin.mjs && next build"
+}

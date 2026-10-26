@@ -1,0 +1,10 @@
+{
+  "kicker": "Development ongoing",
+  "title": "DESIGN LAB",
+  "body": "We are building a space for 3D development, material research, and digital prototyping. It is not quite ready yet, but it is coming soon.",
+  "image": "/images/L_3D_DEVELOPMENT.jpg",
+  "primaryCtaLabel": "Back to home",
+  "primaryCtaHref": "/",
+  "secondaryCtaLabel": "Lets talk",
+  "secondaryCtaHref": "/contact-us"
+}

@@ -1,0 +1,122 @@
+[
+  {
+    "source": "/newsletters/autumn-colors",
+    "destination": "/newsletters/aw27-woven-men-s-urban-patina-workwear",
+    "permanent": false
+  },
+  {
+    "source": "/newsletters/book-reviews",
+    "destination": "/newsletters/ss27-men-s-range-free-style",
+    "permanent": false
+  },
+  {
+    "source": "/newsletters/creative-arts-showcase",
+    "destination": "/newsletters/ss27-men-s-jersey-wear-ringer-tee",
+    "permanent": false
+  },
+  {
+    "source": "/newsletters/culinary-delights",
+    "destination": "/newsletters/ss27-men-s-woven-jorts",
+    "permanent": false
+  },
+  {
+    "source": "/newsletters/diy-projects",
+    "destination": "/newsletters/ss27-men-s-woven-linen-blend",
+    "permanent": false
+  },
+  {
+    "source": "/newsletters/educational-insights",
+    "destination": "/newsletters/ss27-women-s-linen-blend",
+    "permanent": false
+  },
+  {
+    "source": "/newsletters/fashion-forward",
+    "destination": "/newsletters/ss27-men-s-woven-striped-resort-shirts",
+    "permanent": false
+  },
+  {
+    "source": "/newsletters/film-festival-news",
+    "destination": "/newsletters/ss27-men-s-range-souvenir-snacks",
+    "permanent": false
+  },
+  {
+    "source": "/newsletters/financial-freedom",
+    "destination": "/newsletters/ss27-men-s-jersey-striped",
+    "permanent": false
+  },
+  {
+    "source": "/newsletters/fitness-motivation",
+    "destination": "/newsletters/ss27-men-s-woven-wide-leg-trousers",
+    "permanent": false
+  },
+  {
+    "source": "/newsletters/gardening-tips",
+    "destination": "/newsletters/ss27-men-s-jersey-wide-leg-trousers",
+    "permanent": false
+  },
+  {
+    "source": "/newsletters/healthy-living-guide",
+    "destination": "/newsletters/ss27-men-s-jersey-striped",
+    "permanent": false
+  },
+  {
+    "source": "/newsletters/history-uncovered",
+    "destination": "/newsletters/ss27-men-s-woven-gingham-check-shirts",
+    "permanent": false
+  },
+  {
+    "source": "/newsletters/home-decor-ideas",
+    "destination": "/newsletters/ss27-men-s-knitwear",
+    "permanent": false
+  },
+  {
+    "source": "/newsletters/music-spotlight",
+    "destination": "/newsletters/ss27-men-s-range-harbour-lines",
+    "permanent": false
+  },
+  {
+    "source": "/newsletters/new-year-resolutions",
+    "destination": "/newsletters/ss27-men-s-knit-vest",
+    "permanent": false
+  },
+  {
+    "source": "/newsletters/parenting-tips",
+    "destination": "/newsletters/ss27-women-s-jersey-striped",
+    "permanent": false
+  },
+  {
+    "source": "/newsletters/pet-care-essentials",
+    "destination": "/newsletters/ss27-men-s-print-graphics-empowered-play",
+    "permanent": false
+  },
+  {
+    "source": "/newsletters/science-discoveries",
+    "destination": "/newsletters/ss27-men-s-woven-bootcut-trousers",
+    "permanent": false
+  },
+  {
+    "source": "/newsletters/spring-edition",
+    "destination": "/newsletters/aw27-men-s-tailored-outerwear",
+    "permanent": false
+  },
+  {
+    "source": "/newsletters/summer-vibes",
+    "destination": "/newsletters/aw27-women-s-tailored-outerwear",
+    "permanent": false
+  },
+  {
+    "source": "/newsletters/tech-trends-2024",
+    "destination": "/newsletters/ss27-men-s-jersey-muscle-tee",
+    "permanent": false
+  },
+  {
+    "source": "/newsletters/travel-adventures",
+    "destination": "/newsletters/ss27-men-s-jersey-wear-henley",
+    "permanent": false
+  },
+  {
+    "source": "/newsletters/winter-warmth",
+    "destination": "/newsletters/men-s-woven-washed-cotton-shirt",
+    "permanent": false
+  }
+]

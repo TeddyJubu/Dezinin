@@ -1,0 +1,83 @@
+{
+  "metaTitle": "DEZININ",
+  "metaDescription": "Your partner for 3D design, graphic design, and fabric sourcing.",
+  "logo": "/dezinin_vert.svg",
+  "logoCompact": "/images/logo_red.png",
+  "navLinks": [
+    {
+      "label": "DESIGN LAB",
+      "href": "/design-lab"
+    }
+  ],
+  "ctaLabel": "LETS TALK",
+  "ctaHref": "/contact-us",
+  "footerBlurb": "Designing the future of fashion. We are the next-generation fashion innovation company offering end-to-end design and production solutions for the global garment industry.",
+  "footerColumns": [
+    {
+      "title": "Company",
+      "links": [
+        {
+          "label": "About Us",
+          "href": "/about"
+        },
+        {
+          "label": "Contact",
+          "href": "/contact-us"
+        },
+        {
+          "label": "Careers",
+          "href": "/careers"
+        }
+      ]
+    },
+    {
+      "title": "Support",
+      "links": [
+        {
+          "label": "Help Center",
+          "href": "/help"
+        },
+        {
+          "label": "Shipping & Returns",
+          "href": "/shipping"
+        },
+        {
+          "label": "Privacy Policy",
+          "href": "/privacy"
+        },
+        {
+          "label": "Terms & Conditions",
+          "href": "/terms"
+        }
+      ]
+    }
+  ],
+  "socials": [
+    {
+      "label": "TikTok",
+      "href": "#",
+      "icon": "tiktok"
+    },
+    {
+      "label": "Instagram",
+      "href": "https://www.instagram.com/dezininofficial",
+      "icon": "instagram"
+    },
+    {
+      "label": "Facebook",
+      "href": "https://www.facebook.com/dezininfashion",
+      "icon": "facebook"
+    },
+    {
+      "label": "YouTube",
+      "href": "#",
+      "icon": "youtube"
+    },
+    {
+      "label": "LinkedIn",
+      "href": "https://linkedin.com/company/dezinin",
+      "icon": "linkedin"
+    }
+  ],
+  "copyright": "©2026 All rights reserved by DEZININ"
+}

@@ -1,0 +1,139 @@
+"use client";
+
+import Link from "next/link";
+import { useTina } from "tinacms/dist/react";
+import { Footer, Header, ThemeToggle } from "@/components/chrome";
+import { Shell, type HomeContent, type NewsletterContent, type PageContent, type SiteContent, type TinaQuery } from "@/components/content";
+import { ContactSection } from "@/components/contact-section";
+import { HomeView } from "@/components/home-view";
+import { mediaUrl } from "@/components/content";
+import { ArrowUpRight } from "@/components/content";
+
+export function HomeClient({
+  home,
+  site,
+  newsletters,
+}: {
+  home: TinaQuery;
+  site: TinaQuery;
+  newsletters: TinaQuery;
+}) {
+  const homeResult = useTina(home);
+  const siteResult = useTina(site);
+  const newsletterResult = useTina(newsletters);
+  const connection = newsletterResult.data.newsletterConnection as {
+    edges?: { node?: NewsletterContent }[] | null;
+  };
+  const items = (connection?.edges || [])
+    .map((edge) => edge?.node)
+    .filter((node): node is NewsletterContent => Boolean(node))
+    .sort((a, b) => (a.order || 0) - (b.order || 0));
+
+  const siteData = siteResult.data.site as SiteContent;
+  return (
+    <Shell>
+      <Header site={siteData} />
+      <HomeView home={homeResult.data.home as HomeContent} site={siteData} newsletters={items} />
+      <Footer site={siteData} />
+      <ThemeToggle />
+    </Shell>
+  );
+}
+
+export function ContactClient({ home, site }: { home: TinaQuery; site: TinaQuery }) {
+  const homeResult = useTina(home);
+  const siteResult = useTina(site);
+  const siteData = siteResult.data.site as SiteContent;
+  const homeData = homeResult.data.home as HomeContent;
+  return (
+    <Shell>
+      <Header site={siteData} />
+      <main className="pt-20">
+        <ContactSection contact={homeData.contact} socials={siteData.socials} />
+      </main>
+      <Footer site={siteData} />
+      <ThemeToggle />
+    </Shell>
+  );
+}
+
+export function PageClient({ page, site }: { page: TinaQuery; site: TinaQuery }) {
+  const pageResult = useTina(page);
+  const siteResult = useTina(site);
+  const siteData = siteResult.data.site as SiteContent;
+  const data = pageResult.data.page as PageContent;
+  return (
+    <Shell>
+      <Header site={siteData} />
+      <main className="relative min-h-screen w-full overflow-hidden flex items-center justify-center px-4 pt-24 pb-16">
+        <img alt="" aria-hidden="true" src={mediaUrl(data.image)} className="object-cover scale-110 blur-md absolute inset-0 h-full w-full" />
+        <div className="absolute inset-0 bg-background/85" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-background/75" />
+        <div className="relative z-10 max-w-2xl text-center">
+          <p className="text-brand-orange text-xs md:text-sm mb-5 font-medium flex items-center justify-center gap-2 uppercase tracking-[0.2em]">
+            <span className="w-1.5 h-1.5 rounded-full bg-brand-orange" />
+            {data.kicker}
+          </p>
+          <h1 className="text-4xl sm:text-6xl md:text-7xl font-bold text-foreground tracking-tight leading-[1.05]">{data.title}</h1>
+          <p className="mt-6 text-base md:text-lg text-muted-foreground leading-relaxed">{data.body}</p>
+          <div className="mt-10 flex flex-col sm:flex-row gap-4 items-center justify-center">
+            <Link href={data.primaryCtaHref || "/"} prefetch={true} className="px-8 py-3 border border-muted-foreground/40 rounded-full text-foreground text-sm tracking-[0.2em] uppercase hover:bg-foreground hover:text-background transition-colors duration-300">
+              {data.primaryCtaLabel}
+            </Link>
+            <Link href={data.secondaryCtaHref || "/contact-us"} prefetch={true} className="group inline-flex items-center gap-1 px-8 py-3 rounded-full text-brand-orange text-sm tracking-[0.2em] uppercase hover:bg-brand-orange/10 transition-colors duration-300">
+              {data.secondaryCtaLabel}
+              <ArrowUpRight className="h-5 w-5 transition-transform duration-300 group-hover:-translate-y-1 group-hover:translate-x-1" />
+            </Link>
+          </div>
+        </div>
+      </main>
+      <Footer site={siteData} />
+      <ThemeToggle />
+    </Shell>
+  );
+}
+
+export function NewsletterClient({
+  newsletter,
+  site,
+}: {
+  newsletter: TinaQuery;
+  site: TinaQuery;
+}) {
+  const newsletterResult = useTina(newsletter);
+  const siteResult = useTina(site);
+  const siteData = siteResult.data.site as SiteContent;
+  const data = newsletterResult.data.newsletter as NewsletterContent;
+  const pdf = mediaUrl(data.pdf);
+
+  return (
+    <Shell>
+      <Header site={siteData} />
+      <main className="min-h-screen bg-background pt-20">
+        <div className="container mx-auto px-4 py-8">
+          <h1 className="text-4xl md:text-6xl font-bold">{data.title}</h1>
+          {data.summary ? <p className="mt-4 max-w-2xl text-muted-foreground">{data.summary}</p> : null}
+        </div>
+        {pdf ? (
+          <iframe title={data.title || "Lookbook"} src={pdf} className="w-full h-[calc(100vh-8rem)] border-0 bg-black" />
+        ) : (
+          <img src={mediaUrl(data.cover)} alt={data.title || ""} className="mx-auto max-h-[70vh] object-contain" />
+        )}
+        <div className="fixed bottom-8 right-8 z-50 flex flex-col gap-3">
+          {pdf ? (
+            <a href={pdf} download className="group relative bg-brand-orange text-white rounded-full shadow-lg flex items-center overflow-hidden w-14 h-14 hover:w-auto hover:pr-6">
+              <span className="w-14 h-14 flex items-center justify-center flex-shrink-0">↓</span>
+              <span className="font-medium whitespace-nowrap pr-2 opacity-0 max-w-0 group-hover:opacity-100 group-hover:max-w-xs transition-all duration-300">Download</span>
+            </a>
+          ) : null}
+          <Link href="/contact-us" prefetch={true} className="group relative bg-zinc-800/80 backdrop-blur-md border border-white/20 text-white rounded-full shadow-lg flex items-center overflow-hidden w-14 h-14 hover:w-auto hover:pr-6">
+            <span className="w-14 h-14 flex items-center justify-center flex-shrink-0">✉</span>
+            <span className="font-medium whitespace-nowrap pr-2 opacity-0 max-w-0 group-hover:opacity-100 group-hover:max-w-xs transition-all duration-300">Enquiry</span>
+          </Link>
+        </div>
+      </main>
+      <Footer site={siteData} />
+      <ThemeToggle />
+    </Shell>
+  );
+}
