@@ -33,12 +33,20 @@ function fieldRow(toggle: Element) {
   return node;
 }
 
+function isSectionBoundary(node: HTMLElement) {
+  return node.matches("[data-section-toggle]") || Boolean(node.querySelector("[data-section-toggle]"));
+}
+
 function lockSections() {
+  document.querySelectorAll<HTMLElement>("[data-section-toggle][data-section-locked]").forEach((toggle) => {
+    toggle.removeAttribute("data-section-locked");
+    toggle.removeAttribute("inert");
+  });
   document.querySelectorAll<HTMLElement>("[data-section-toggle]").forEach((toggle) => {
     const hidden = toggle.getAttribute("aria-checked") === "false" || toggle.getAttribute("data-edit-locked") === "true";
     let sibling = fieldRow(toggle).nextElementSibling as HTMLElement | null;
     while (sibling) {
-      if (sibling.querySelector("[data-section-toggle]")) break;
+      if (isSectionBoundary(sibling)) break;
       if (hidden) {
         if (sibling.getAttribute("data-section-locked") !== "true") {
           sibling.setAttribute("data-section-locked", "true");
