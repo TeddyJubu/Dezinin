@@ -26,6 +26,7 @@ var ADMIN_CSS = ADMIN_FONTS + `
   --tina-color-grey-10: #f7f1ea;
   --tina-font-family: Montserrat, sans-serif;
   --dezinin-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --dezinin-nav-width: 240px;
 }
 html, body.tina-tailwind {
   background: #120f0e;
@@ -204,6 +205,32 @@ html, body.tina-tailwind {
   color: #f7f1ea !important;
   box-shadow: inset 2px 0 0 #fe4101;
 }
+.tina-tailwind .flex.items-stretch.h-dvh > .relative.z-30.w-96 {
+  display: flex !important;
+  width: var(--dezinin-nav-width) !important;
+  min-width: var(--dezinin-nav-width) !important;
+  max-width: var(--dezinin-nav-width) !important;
+  flex: 0 0 var(--dezinin-nav-width) !important;
+  height: 100dvh !important;
+  background: #1a1513 !important;
+  border-right: 1px solid #2a2422 !important;
+  color: #f7f1ea !important;
+}
+.tina-tailwind .flex.items-stretch.h-dvh > .relative.z-30.w-96 h4 {
+  color: #8b8988 !important;
+}
+.tina-tailwind .flex.items-stretch.h-dvh > .w-full {
+  flex: 1 1 auto !important;
+  width: auto !important;
+  min-width: 0 !important;
+}
+.tina-tailwind .z-overlay,
+.tina-tailwind .z-menu,
+.tina-tailwind button[aria-label="Open navigation menu"],
+.tina-tailwind button[aria-label="Toggle navigation menu"],
+.tina-tailwind .relative.z-30.w-96 .justify-between > button {
+  display: none !important;
+}
 .tina-tailwind svg[viewBox="0 0 32 32"]:has(path[d^="M18.6466"]) {
   background: url("/images/logo_red.png") center / contain no-repeat;
   width: 36px !important;
@@ -221,6 +248,13 @@ html, body.tina-tailwind {
 }
 .tina-tailwind svg[viewBox="0 0 1020 254"] path {
   opacity: 0;
+}
+.tina-tailwind .relative.z-30.w-96 svg[viewBox="0 0 1020 254"] {
+  width: 188px !important;
+  min-width: 0 !important;
+}
+.tina-tailwind .flex.items-stretch.h-dvh > .w-full svg[viewBox="0 0 32 32"] {
+  display: none !important;
 }
 .tina-tailwind a[href*="tina.io"] {
   display: none !important;
@@ -316,55 +350,8 @@ html, body.tina-tailwind {
 .dezinin-icon-btn svg {
   display: block;
 }
-.dezinin-cards {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 0.75rem;
-  margin: 0.25rem 0 0.35rem;
-}
-@media (min-width: 760px) {
-  .dezinin-cards {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-.dezinin-card {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 1.25rem;
-  min-height: 7.25rem;
-  padding: 1rem 1.05rem 0.95rem;
-  border: 1px solid #2a2422;
-  border-radius: 0.95rem;
-  background: #1a1614;
-  color: #f7f1ea !important;
-  text-decoration: none;
-  transition: border-color 0.3s var(--dezinin-ease), background-color 0.3s var(--dezinin-ease), transform 0.3s var(--dezinin-ease);
-}
-.dezinin-card:hover {
-  border-color: #5c5654;
-  background: #221c1a;
-  color: #f7f1ea !important;
-}
-.dezinin-card:active {
-  transform: scale(0.98);
-}
-.dezinin-card strong {
-  display: block;
-  font-size: 1.05rem;
-  font-weight: 600;
-  letter-spacing: -0.03em;
-  line-height: 1.2;
-}
-.dezinin-card span {
-  display: block;
-  margin-top: 0.35rem;
-  font-size: 0.8125rem;
-  line-height: 1.45;
-  color: #a39e9b;
-}
 .dezinin-settings-label {
-  margin: 1.35rem 0 0.15rem;
+  margin: 0.15rem 0 0.85rem;
   font-size: 0.8125rem;
   font-weight: 600;
   letter-spacing: 0.16em;
@@ -585,28 +572,7 @@ function repairPreviewHash() {
 }
 var DASHBOARD = "#/collections/edit/site/global";
 var MAIN_PAGE = "#/collections/edit/home/index";
-var DESTINATIONS = [
-  {
-    href: "#/collections/edit/home/index",
-    title: "Main page",
-    text: "Hero, partners, projects, gallery, FAQ, and contact."
-  },
-  {
-    href: "#/collections/page/~",
-    title: "Other pages",
-    text: "Contact and Design Lab."
-  },
-  {
-    href: "#/screens/media_manager",
-    title: "Media manager",
-    text: "Images and video used on the site."
-  },
-  {
-    href: "#/collections/user/~",
-    title: "Users",
-    text: "Who can sign in to the editor."
-  }
-];
+var NAV_WIDTH = 240;
 function documentHash() {
   const hash = window.location.hash.split("?")[0];
   return hash.length > 1 ? hash.replace(/\/+$/, "") : hash;
@@ -632,30 +598,38 @@ function openDashboard() {
   if (!landings.has(hash)) return;
   window.location.hash = DASHBOARD;
 }
-function cardGrid() {
-  const block = document.createElement("div");
-  block.setAttribute("data-dezinin-cards", "");
-  const grid = document.createElement("div");
-  grid.className = "dezinin-cards";
-  for (const destination of DESTINATIONS) {
-    const link = document.createElement("a");
-    link.className = "dezinin-card";
-    link.href = destination.href;
-    const title = document.createElement("strong");
-    title.textContent = destination.title;
-    const text = document.createElement("span");
-    text.textContent = destination.text;
-    link.append(title, text);
-    grid.append(link);
+function pinNavigation() {
+  document.documentElement.style.setProperty("--dezinin-nav-width", `${NAV_WIDTH}px`);
+}
+function keepNavigationOpen(event) {
+  if (!(event.target instanceof Element) || event.isTrusted === false) return;
+  const toggle = event.target.closest(
+    'button[aria-label="Open navigation menu"], button[aria-label="Toggle navigation menu"]'
+  );
+  if (toggle) {
+    event.preventDefault();
+    event.stopPropagation();
+    return;
   }
-  const label = document.createElement("div");
-  label.className = "dezinin-settings-label";
-  label.textContent = "Common settings";
-  block.append(grid, label);
-  return block;
+  const nav = event.target.closest(".z-overlay");
+  if (!nav) return;
+  if (event.target.closest(".justify-between button")) {
+    event.preventDefault();
+    event.stopPropagation();
+    return;
+  }
+  const anchor = event.target.closest("a[href]");
+  if (!(anchor instanceof HTMLAnchorElement)) return;
+  const href = anchor.getAttribute("href") || "";
+  const hashIndex = href.indexOf("#");
+  if (hashIndex < 0) return;
+  event.preventDefault();
+  event.stopPropagation();
+  const next = href.slice(hashIndex);
+  if (window.location.hash !== next) window.location.hash = next;
 }
 function relabelDashboardLink() {
-  document.querySelectorAll('a[href="#/collections/site/~"], a[href="/collections/site/~"]').forEach((link) => {
+  document.querySelectorAll('a[href$="#/collections/site/~"]').forEach((link) => {
     const walker = document.createTreeWalker(link, NodeFilter.SHOW_TEXT);
     let node = walker.nextNode();
     while (node) {
@@ -666,6 +640,7 @@ function relabelDashboardLink() {
 }
 function mountDashboard(cms) {
   relabelDashboardLink();
+  pinNavigation();
   const onDashboard = isHash(DASHBOARD);
   const nested = isNested(cms);
   document.querySelectorAll('nav[aria-label="breadcrumb"]').forEach((nav) => {
@@ -679,12 +654,16 @@ function mountDashboard(cms) {
     }
   });
   if (!onDashboard || nested) {
-    document.querySelector("[data-dezinin-cards]")?.remove();
+    document.querySelector("[data-dezinin-settings]")?.remove();
     return;
   }
   const host = document.querySelector('[data-test="form:content/site/global.json"] > div');
-  if (!host || host.querySelector("[data-dezinin-cards]")) return;
-  host.prepend(cardGrid());
+  if (!host || host.querySelector("[data-dezinin-settings]")) return;
+  const label = document.createElement("div");
+  label.className = "dezinin-settings-label";
+  label.setAttribute("data-dezinin-settings", "");
+  label.textContent = "Common settings";
+  host.prepend(label);
 }
 function showMainPageFields(button, cms) {
   const root = cms.state?.breadcrumbs?.[0];
@@ -765,6 +744,7 @@ function installDezininBrand(cms) {
     mountDashboard(editor);
   }, 0));
   document.addEventListener("click", (event) => keepSingletonBackInEditor(event, editor), true);
+  document.addEventListener("click", keepNavigationOpen, true);
   repairPreviewHash();
   window.addEventListener("hashchange", () => {
     repairPreviewHash();
