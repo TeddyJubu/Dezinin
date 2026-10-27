@@ -312,6 +312,61 @@ html, body.tina-tailwind {
 .dezinin-icon-btn svg {
   display: block;
 }
+.dezinin-cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+  margin: 0.25rem 0 0.35rem;
+}
+@media (min-width: 760px) {
+  .dezinin-cards {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.dezinin-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1.25rem;
+  min-height: 7.25rem;
+  padding: 1rem 1.05rem 0.95rem;
+  border: 1px solid #2a2422;
+  border-radius: 0.95rem;
+  background: #1a1614;
+  color: #f7f1ea !important;
+  text-decoration: none;
+  transition: border-color 0.3s var(--dezinin-ease), background-color 0.3s var(--dezinin-ease), transform 0.3s var(--dezinin-ease);
+}
+.dezinin-card:hover {
+  border-color: #5c5654;
+  background: #221c1a;
+  color: #f7f1ea !important;
+}
+.dezinin-card:active {
+  transform: scale(0.98);
+}
+.dezinin-card strong {
+  display: block;
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+}
+.dezinin-card span {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: #a39e9b;
+}
+.dezinin-settings-label {
+  margin: 1.35rem 0 0.15rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #f7f1ea;
+}
 .tina-tailwind [data-cms-section] {
   box-sizing: border-box;
   margin-left: 0.2rem;
@@ -532,7 +587,117 @@ function repairPreviewHash() {
   window.dispatchEvent(new HashChangeEvent("hashchange"));
 }
 
+const DASHBOARD = "#/collections/edit/site/global";
 const MAIN_PAGE = "#/collections/edit/home/index";
+const DESTINATIONS = [
+  {
+    href: "#/collections/edit/home/index",
+    title: "Main page",
+    text: "Hero, partners, projects, gallery, FAQ, and contact.",
+  },
+  {
+    href: "#/collections/page/~",
+    title: "Other pages",
+    text: "Contact and Design Lab.",
+  },
+  {
+    href: "#/screens/media_manager",
+    title: "Media manager",
+    text: "Images and video used on the site.",
+  },
+  {
+    href: "#/collections/user/~",
+    title: "Users",
+    text: "Who can sign in to the editor.",
+  },
+];
+
+function documentHash() {
+  const hash = window.location.hash.split("?")[0];
+  return hash.length > 1 ? hash.replace(/\/+$/, "") : hash;
+}
+
+function isHash(path: string) {
+  const hash = documentHash();
+  return hash === path || hash.startsWith(`${path}/`);
+}
+
+function activeFieldName(cms: EditorCms) {
+  const forms = cms.state?.forms;
+  const id = cms.state?.activeFormId;
+  if (!forms || !id) return "";
+  const match = forms.find((entry) => entry.tinaForm?.id === id);
+  return match?.activeFieldName || "";
+}
+
+function isNested(cms: EditorCms) {
+  if ((cms.state?.breadcrumbs?.length || 0) > 1) return true;
+  return Boolean(activeFieldName(cms));
+}
+
+function openDashboard() {
+  const hash = documentHash();
+  const landings = new Set(["", "#", "#/", "#/collections/site", "#/collections/site/~"]);
+  if (!landings.has(hash)) return;
+  window.location.hash = DASHBOARD;
+}
+
+function cardGrid() {
+  const block = document.createElement("div");
+  block.setAttribute("data-dezinin-cards", "");
+  const grid = document.createElement("div");
+  grid.className = "dezinin-cards";
+  for (const destination of DESTINATIONS) {
+    const link = document.createElement("a");
+    link.className = "dezinin-card";
+    link.href = destination.href;
+    const title = document.createElement("strong");
+    title.textContent = destination.title;
+    const text = document.createElement("span");
+    text.textContent = destination.text;
+    link.append(title, text);
+    grid.append(link);
+  }
+  const label = document.createElement("div");
+  label.className = "dezinin-settings-label";
+  label.textContent = "Common settings";
+  block.append(grid, label);
+  return block;
+}
+
+function relabelDashboardLink() {
+  document.querySelectorAll('a[href="#/collections/site/~"], a[href="/collections/site/~"]').forEach((link) => {
+    const walker = document.createTreeWalker(link, NodeFilter.SHOW_TEXT);
+    let node = walker.nextNode();
+    while (node) {
+      if (node.textContent?.trim() === "Common settings") node.textContent = "Dashboard";
+      node = walker.nextNode();
+    }
+  });
+}
+
+function mountDashboard(cms: EditorCms) {
+  relabelDashboardLink();
+  const onDashboard = isHash(DASHBOARD);
+  const nested = isNested(cms);
+  document.querySelectorAll('nav[aria-label="breadcrumb"]').forEach((nav) => {
+    const bar = nav.closest(".border-b");
+    if (onDashboard && !nested) {
+      nav.setAttribute("hidden", "");
+      bar?.setAttribute("hidden", "");
+    } else {
+      nav.removeAttribute("hidden");
+      bar?.removeAttribute("hidden");
+    }
+  });
+  if (!onDashboard || nested) {
+    document.querySelector("[data-dezinin-cards]")?.remove();
+    return;
+  }
+  const host = document.querySelector('[data-test="form:content/site/global.json"] > div');
+  if (!host || host.querySelector("[data-dezinin-cards]")) return;
+  host.prepend(cardGrid());
+}
 
 type EditorCms = {
   dispatch?: (action: {
@@ -542,13 +707,9 @@ type EditorCms = {
   state?: {
     activeFormId?: string | null;
     breadcrumbs?: Array<{ formId: string; formName: string }>;
+    forms?: Array<{ tinaForm?: { id?: string }; activeFieldName?: string }>;
   };
 };
-
-function onMainPageDocument() {
-  const hash = window.location.hash.split("?")[0].replace(/\/+$/, "");
-  return hash === MAIN_PAGE || hash.startsWith(`${MAIN_PAGE}/`);
-}
 
 function showMainPageFields(button: Element, cms: EditorCms) {
   const root = cms.state?.breadcrumbs?.[0];
@@ -567,16 +728,21 @@ function keepSingletonBackInEditor(event: Event, cms: EditorCms) {
   const target = event.target;
   if (!(target instanceof Element)) return;
   const button = target.closest("button[aria-label^='Back to']");
-  if (!button || !window.location.hash.startsWith("#/collections/edit/")) return;
-  // Tina's own handler sets location to the collection list. Nested items such as
-  // an FAQ question keep this hash and live in form state, so clear that instead.
+  if (!button || !documentHash().startsWith("#/collections/")) return;
+  // A page document returns to the pages list through Tina's own handler.
+  if (documentHash().startsWith("#/collections/edit/page")) return;
+  // Nested items such as an FAQ question keep the document hash and live in form state.
   event.preventDefault();
   event.stopPropagation();
-  if (onMainPageDocument()) {
-    showMainPageFields(button, cms);
+  if (isHash(DASHBOARD) || isHash(MAIN_PAGE)) {
+    if (isNested(cms)) {
+      showMainPageFields(button, cms);
+      return;
+    }
+    if (isHash(MAIN_PAGE)) window.location.hash = DASHBOARD;
     return;
   }
-  window.location.hash = MAIN_PAGE;
+  window.location.hash = DASHBOARD;
 }
 
 export function installDezininBrand<T>(cms: T): T {
@@ -596,11 +762,14 @@ export function installDezininBrand<T>(cms: T): T {
   style.textContent = ADMIN_CSS;
   if (branded.__dezininBrand) return cms;
   branded.__dezininBrand = true;
+  const editor = cms as EditorCms;
   const paint = () => {
+    openDashboard();
     rewriteTree(document.body);
     lockSections();
     markSections();
     markNav();
+    mountDashboard(editor);
   };
   paint();
   const observer = new MutationObserver((records) => {
@@ -616,15 +785,21 @@ export function installDezininBrand<T>(cms: T): T {
     if (structural) {
       markSections();
       markNav();
+      mountDashboard(editor);
     }
   });
   observer.observe(document.body, { subtree: true, childList: true, characterData: true });
-  document.addEventListener("click", () => window.setTimeout(lockSections, 0));
-  document.addEventListener("click", (event) => keepSingletonBackInEditor(event, cms as EditorCms), true);
+  document.addEventListener("click", () => window.setTimeout(() => {
+    lockSections();
+    mountDashboard(editor);
+  }, 0));
+  document.addEventListener("click", (event) => keepSingletonBackInEditor(event, editor), true);
   repairPreviewHash();
   window.addEventListener("hashchange", () => {
     repairPreviewHash();
+    openDashboard();
     markNav();
+    mountDashboard(editor);
   });
   return cms;
 }

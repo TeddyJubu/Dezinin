@@ -200,7 +200,7 @@ export default defineConfig({
       },
       {
         name: "page",
-        label: "Pages",
+        label: "Other pages",
         path: "content/pages",
         format: "json",
         ui: {
