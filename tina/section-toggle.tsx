@@ -16,33 +16,19 @@ type SectionToggleProps = {
   form?: FormApi;
 };
 
-const iconButton = (color: string): React.CSSProperties => ({
-  flex: "none",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  width: 36,
-  height: 36,
-  padding: 0,
-  border: "none",
-  borderRadius: 8,
-  background: "transparent",
-  color,
-  cursor: "pointer",
-});
-
 function EyeIcon({ shown }: { shown: boolean }) {
   return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true" style={{ display: "block", opacity: shown ? 1 : 0.45 }}>
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" stroke="currentColor" strokeWidth="1.75" strokeLinejoin="round" />
       <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.75" />
+      {shown ? null : <path d="M5 19 19 5" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />}
     </svg>
   );
 }
 
 function LockIcon() {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true" style={{ display: "block" }}>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" strokeWidth="1.75" />
       <path d="M8 11V8a4 4 0 0 1 8 0v3" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
     </svg>
@@ -51,7 +37,7 @@ function LockIcon() {
 
 function UnlockIcon() {
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true" style={{ display: "block" }}>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" strokeWidth="1.75" />
       <path d="M8 11V8a4 4 0 0 1 7.4-2" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
     </svg>
@@ -76,38 +62,36 @@ export function SectionToggle({ input, field, form }: SectionToggleProps) {
     };
   }, [form, lockName]);
 
+  const status = locked && !shown ? "Hidden and locked" : locked ? "Locked" : shown ? "Visible on the site" : "Hidden on the site";
+
   return (
     <div
+      className="dezinin-section"
       data-section-toggle={field.name}
       data-edit-locked={locked ? "true" : "false"}
+      data-shown={shown ? "true" : "false"}
       aria-checked={shown ? "true" : "false"}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: 16,
-        marginBottom: 8,
-        padding: "10px 12px",
-        border: "1px solid #2a2422",
-        borderRadius: 8,
-        background: "#1a1614",
-      }}
     >
-      <div style={{ fontSize: 15, fontWeight: 600, color: shown ? "#e4e2df" : "#6f6a67" }}>{label}</div>
-      <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
+      <div className="dezinin-section-copy">
+        <div className="dezinin-section-label">{label}</div>
+        <div className="dezinin-section-status">{status}</div>
+      </div>
+      <div className="dezinin-section-actions">
         <button
           type="button"
+          className="dezinin-icon-btn"
           role="switch"
           aria-checked={shown}
           aria-label={`${label} visibility`}
           title={shown ? "Shown" : "Hidden"}
           onClick={() => input.onChange(!shown)}
-          style={iconButton(shown ? "#e4e2df" : "#6f6a67")}
         >
           <EyeIcon shown={shown} />
         </button>
         <button
           type="button"
+          className="dezinin-icon-btn"
+          data-hot={locked ? "true" : "false"}
           aria-pressed={locked}
           aria-label={locked ? `${label} locked` : `${label} unlocked`}
           title={locked ? "Locked" : "Unlocked"}
@@ -116,7 +100,6 @@ export function SectionToggle({ input, field, form }: SectionToggleProps) {
             setLocked(next);
             form?.change(lockName, next);
           }}
-          style={iconButton(locked ? "#fe4101" : "#e4e2df")}
         >
           {locked ? <LockIcon /> : <UnlockIcon />}
         </button>
