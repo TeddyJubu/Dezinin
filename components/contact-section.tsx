@@ -12,21 +12,48 @@ export function ContactSection({
   socials?: SocialLink[] | null;
 }) {
   const [interest, setInterest] = useState("");
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
   const email = contact?.email || "info@dezinin.com";
 
-  function onSubmit(event: FormEvent<HTMLFormElement>) {
+  async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    const lines = [
-      `Name: ${data.get("full_name") || ""}`,
-      `Company: ${data.get("company") || ""}`,
-      `Email: ${data.get("email") || ""}`,
-      `Phone: ${data.get("phone") || ""}`,
-      `Interest: ${interest}`,
-      "",
-      String(data.get("full_text") || ""),
-    ];
-    window.location.href = `mailto:${email}?subject=${encodeURIComponent("Dezinin enquiry")}&body=${encodeURIComponent(lines.join("\n"))}`;
+    const form = event.currentTarget;
+    const data = new FormData(form);
+    const payload = {
+      name: String(data.get("full_name") || ""),
+      company: String(data.get("company") || ""),
+      email: String(data.get("email") || ""),
+      phone: String(data.get("phone") || ""),
+      interest,
+      message: String(data.get("full_text") || ""),
+      company_url: String(data.get("company_url") || ""),
+    };
+    setSending(true);
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) throw new Error("send failed");
+      form.reset();
+      setInterest("");
+      setSent(true);
+    } catch {
+      const lines = [
+        `Name: ${payload.name}`,
+        `Company: ${payload.company}`,
+        `Email: ${payload.email}`,
+        `Phone: ${payload.phone}`,
+        `Interest: ${payload.interest}`,
+        "",
+        payload.message,
+      ];
+      window.location.href = `mailto:${email}?subject=${encodeURIComponent("Dezinin enquiry")}&body=${encodeURIComponent(lines.join("\n"))}`;
+    } finally {
+      setSending(false);
+    }
   }
 
   return (
@@ -61,6 +88,7 @@ export function ContactSection({
           <div className="w-full lg:w-[45%]">
             <h4 className="text-xl md:text-2xl font-bold text-foreground leading-tight mb-6">{contact?.formTitle}</h4>
             <form className="space-y-5 w-full" onSubmit={onSubmit}>
+              <input name="company_url" tabIndex={-1} autoComplete="off" aria-hidden="true" className="absolute -left-[9999px] h-0 w-0 opacity-0" />
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm md:text-xl">
                 <input name="full_name" required placeholder={contact?.namePlaceholder || ""} className="w-full bg-transparent border-b border-muted-foreground pb-2 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#fe4101] transition-colors text-sm" />
                 <input name="company" placeholder={contact?.companyPlaceholder || ""} className="w-full bg-transparent border-b border-muted-foreground pb-2 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#fe4101] transition-colors text-sm" />
@@ -87,9 +115,10 @@ export function ContactSection({
               <div className="pt-2">
                 <textarea name="full_text" required rows={2} placeholder={contact?.messagePlaceholder || ""} className="w-full bg-transparent border-b border-muted-foreground pb-2 text-foreground placeholder-muted-foreground focus:outline-none focus:border-[#fe4101] transition-colors resize-none text-sm" />
               </div>
-              <button type="submit" className="px-8 py-3 border border-muted-foreground/40 rounded-full text-foreground text-sm tracking-[0.2em] uppercase hover:bg-foreground hover:text-background transition-colors">
-                {contact?.submitLabel || "SEND MESSAGE"}
+              <button type="submit" disabled={sending} className="px-8 py-3 border border-muted-foreground/40 rounded-full text-foreground text-sm tracking-[0.2em] uppercase hover:bg-foreground hover:text-background transition-colors disabled:opacity-60">
+                {sending ? "SENDING" : contact?.submitLabel || "SEND MESSAGE"}
               </button>
+              {sent ? <p className="text-sm text-[#fe4101]">Message sent. We will reply to you by email.</p> : null}
             </form>
           </div>
         </div>

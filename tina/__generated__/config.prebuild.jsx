@@ -208,6 +208,14 @@ html, body.tina-tailwind {
   background: #221c1a;
   color: #f7f1ea !important;
 }
+#dezinin-mail {
+  flex: 1 1 auto;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  border: 0;
+  background: #120f0e;
+}
 .tina-tailwind .flex.items-stretch.h-dvh > .relative.z-30.w-96 {
   display: flex !important;
   width: var(--dezinin-nav-width) !important;
@@ -579,15 +587,96 @@ function markSections() {
     });
   });
 }
+var MAIL = "#/mail";
+var MAIL_KEY = "dezinin-mail";
+var retainMail = false;
+function mailMode() {
+  try {
+    return sessionStorage.getItem(MAIL_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+function setMailMode(open) {
+  try {
+    if (open) sessionStorage.setItem(MAIL_KEY, "1");
+    else sessionStorage.removeItem(MAIL_KEY);
+  } catch {
+  }
+}
+function repairMailRoute() {
+  if (documentHash() !== MAIL) return false;
+  retainMail = true;
+  setMailMode(true);
+  window.location.hash = DASHBOARD;
+  window.setTimeout(() => {
+    retainMail = false;
+  }, 0);
+  return true;
+}
 function markNav() {
   const match = window.location.hash.match(/#\/collections\/(?:edit\/)?([^/?#]+)/);
   const active = match?.[1] || "";
+  const onMail = mailMode();
   document.querySelectorAll("a[href^='#/collections/']").forEach((link) => {
     const href = link.getAttribute("href") || "";
     const name = href.match(/#\/collections\/([^/?#]+)/)?.[1] || "";
-    if (name && name === active) link.setAttribute("data-nav-active", "true");
+    if (!onMail && name && name === active) link.setAttribute("data-nav-active", "true");
     else link.removeAttribute("data-nav-active");
   });
+  document.querySelectorAll('a[href="#/mail"]').forEach((link) => {
+    if (onMail) link.setAttribute("data-nav-active", "true");
+    else link.removeAttribute("data-nav-active");
+  });
+}
+function mountMailLink() {
+  const list = document.querySelector("ul.flex.flex-col.gap-4");
+  if (!list || list.querySelector('a[href="#/mail"]')) return;
+  const sample = list.querySelector("a");
+  if (!sample) return;
+  const link = document.createElement("a");
+  link.href = "#/mail";
+  link.className = sample.className;
+  link.textContent = "Mail";
+  const item = document.createElement("li");
+  item.appendChild(link);
+  list.appendChild(item);
+}
+function mountMail() {
+  const main = document.querySelector(".flex.items-stretch.h-dvh > .w-full");
+  if (!main) return;
+  const onMail = mailMode();
+  if (!onMail) {
+    document.getElementById("dezinin-mail")?.remove();
+    if (main.dataset.dezininMailHost === "true") {
+      delete main.dataset.dezininMailHost;
+      main.style.display = "";
+      main.style.flexDirection = "";
+      main.style.minHeight = "";
+    }
+    main.querySelectorAll("[data-dezinin-mail-hidden]").forEach((node) => {
+      node.style.display = "";
+      node.removeAttribute("data-dezinin-mail-hidden");
+    });
+    return;
+  }
+  main.dataset.dezininMailHost = "true";
+  main.style.display = "flex";
+  main.style.flexDirection = "column";
+  main.style.minHeight = "100%";
+  Array.from(main.children).forEach((child) => {
+    if (child.id === "dezinin-mail") return;
+    const node = child;
+    node.setAttribute("data-dezinin-mail-hidden", "true");
+    node.style.display = "none";
+  });
+  if (!document.getElementById("dezinin-mail")) {
+    const frame = document.createElement("iframe");
+    frame.id = "dezinin-mail";
+    frame.title = "Mail";
+    frame.src = "/editor/mail";
+    main.appendChild(frame);
+  }
 }
 function lockSections() {
   document.querySelectorAll("[data-section-toggle][data-section-locked]").forEach((toggle) => {
@@ -682,6 +771,33 @@ function openDashboard() {
 }
 function pinNavigation() {
   document.documentElement.style.setProperty("--dezinin-nav-width", `${NAV_WIDTH}px`);
+}
+function onMailNavigation(event) {
+  if (!(event.target instanceof Element)) return;
+  const mailLink = event.target.closest('a[href="#/mail"]');
+  if (mailLink) {
+    event.preventDefault();
+    event.stopPropagation();
+    setMailMode(true);
+    if (!document.querySelector(".flex.items-stretch.h-dvh > .w-full")) {
+      retainMail = true;
+      window.location.hash = DASHBOARD;
+      window.setTimeout(() => {
+        retainMail = false;
+      }, 0);
+      return;
+    }
+    markNav();
+    mountMail();
+    return;
+  }
+  const link = event.target.closest("a[href]");
+  if (!(link instanceof HTMLAnchorElement) || !mailMode()) return;
+  const href = link.getAttribute("href") || "";
+  if (!href.includes("#/")) return;
+  setMailMode(false);
+  markNav();
+  mountMail();
 }
 function keepNavigationOpen(event) {
   if (!(event.target instanceof Element) || event.isTrusted === false) return;
@@ -875,11 +991,14 @@ function installDezininBrand(cms) {
   branded.__dezininBrand = true;
   const editor = cms;
   const paint = () => {
+    if (repairMailRoute()) return;
     openDashboard();
     rewriteTree(document.body);
     lockSections();
     markSections();
     markNav();
+    mountMailLink();
+    mountMail();
     mountDashboard(editor);
     mountImageActions();
   };
@@ -897,6 +1016,8 @@ function installDezininBrand(cms) {
     if (structural) {
       markSections();
       markNav();
+      mountMailLink();
+      mountMail();
       mountDashboard(editor);
       mountImageActions();
     }
@@ -907,16 +1028,24 @@ function installDezininBrand(cms) {
     mountDashboard(editor);
   }, 0));
   document.addEventListener("click", (event) => keepSingletonBackInEditor(event, editor), true);
+  document.addEventListener("click", onMailNavigation, true);
   document.addEventListener("click", keepNavigationOpen, true);
   document.addEventListener("click", onImageActionClick, true);
   document.addEventListener("keydown", onImageActionKeydown, true);
   repairPreviewHash();
-  window.addEventListener("hashchange", () => {
+  window.addEventListener("hashchange", (event) => {
     repairPreviewHash();
+    if (repairMailRoute()) return;
+    const previous = new URL(event.oldURL).hash.replace(/\?.*$/, "").replace(/\/+$/, "");
+    const next = new URL(event.newURL).hash.replace(/\?.*$/, "").replace(/\/+$/, "");
+    if (!retainMail && previous !== next) setMailMode(false);
     openDashboard();
     markNav();
+    mountMailLink();
+    mountMail();
     mountDashboard(editor);
   });
+  window.setTimeout(paint, 50);
   return cms;
 }
 

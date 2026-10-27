@@ -5,7 +5,7 @@
 - Authenticate the production admin with Auth.js on a self-hosted backend, and do not use paid TinaCloud.
 - White-label the admin with the Dezinin brand identity and remove TinaCMS branding.
 - Keep version control in a local git repository and commit after every change. Do not push unless asked.
-- Keep the admin sidebar permanently open. It lists Basic settings, Main page, Other pages, Media Manager, and Users. The editor home is the Basic settings form. Do not add dashboard cards for those destinations, and do not let the sidebar collapse.
+- Keep the admin sidebar permanently open. It lists Basic settings, Main page, Other pages, Media Manager, Users, and Mail. The editor home is the Basic settings form. Do not add dashboard cards for those destinations, and do not let the sidebar collapse.
 - Keep admin Back navigation inside the editor and do not use `history.back()`. From the Main page field list, Back goes to Basic settings (`#/collections/edit/site/global`). A nested item such as an FAQ question returns to that page’s field list first. Other pages documents return to the Other pages list. Basic settings and Main page must not share one preview route.
 
 ## Learned Workspace Facts

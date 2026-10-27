@@ -8,12 +8,20 @@ import "./globals.css";
 export const revalidate = 60;
 
 export async function generateMetadata(): Promise<Metadata> {
-  const site = await loadSite();
-  return {
-    title: site.data.site.metaTitle || "DEZININ",
-    description: site.data.site.metaDescription || "Your partner for 3D design, graphic design, and fabric sourcing.",
-    icons: { icon: "/favicon.ico" },
-  };
+  try {
+    const site = await loadSite();
+    return {
+      title: site.data.site.metaTitle || "DEZININ",
+      description: site.data.site.metaDescription || "Your partner for 3D design, graphic design, and fabric sourcing.",
+      icons: { icon: "/favicon.ico" },
+    };
+  } catch {
+    return {
+      title: "DEZININ",
+      description: "Your partner for 3D design, graphic design, and fabric sourcing.",
+      icons: { icon: "/favicon.ico" },
+    };
+  }
 }
 
 const themeScript = `(function(){try{var t=localStorage.getItem("theme")||"dark";if(t==="system"){t=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";}var root=document.documentElement;root.classList.remove("light","dark");root.classList.add(t);root.style.colorScheme=t;}catch(e){}})();`;
