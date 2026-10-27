@@ -256,7 +256,7 @@ html, body.tina-tailwind {
   width: 188px !important;
   min-width: 0 !important;
 }
-.tina-tailwind .flex.items-stretch.h-dvh > .w-full svg[viewBox="0 0 32 32"] {
+.tina-tailwind .flex.items-stretch.h-dvh > .w-full svg[viewBox="0 0 32 32"]:has(path[d^="M18.6466"]) {
   display: none !important;
 }
 .tina-tailwind a[href*="tina.io"] {
