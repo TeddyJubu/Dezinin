@@ -21,7 +21,17 @@ export async function GET(request: Request) {
       const message = await readMessage(folder, uid);
       return Response.json({ configured: true, address: mailAddress(), message });
     }
-    return Response.json({ configured: true, ...(await listMailbox(folder)) });
+    const before = Number(url.searchParams.get("before") || "");
+    const q = url.searchParams.get("q") || "";
+    const unseen = url.searchParams.get("unseen") === "1" || url.searchParams.get("unseen") === "true";
+    return Response.json({
+      configured: true,
+      ...(await listMailbox(folder, {
+        before: Number.isInteger(before) && before > 0 ? before : undefined,
+        q,
+        unseen,
+      })),
+    });
   } catch (error) {
     return Response.json({ error: publicMailError(error) }, { status: 502 });
   }

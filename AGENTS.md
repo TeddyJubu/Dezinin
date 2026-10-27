@@ -17,4 +17,7 @@
 - The site collection schema label is "Common settings" (`content/site`). The sidebar shows that link as "Basic settings", and the dashboard route is `#/collections/edit/site/global`. Home stays "Main page" (`content/home`). Do not set `ui.global`.
 - The homepage newsletter/lookbook section and the CMS Newsletters nav are removed. Newsletter JSON remains in `content/newsletters`, and existing lookbook URLs can still open.
 - In the admin editor, the Partner logos list (`data-test=list-partners` on the home collection) shows three logos per row. That layout is editor-only; the public site layout is unchanged.
+- In the admin editor, image previews show delete and upload controls only on hover or focus. Keep the always-visible round button beside those previews hidden.
 - Production uploads use the custom media store in `tina/media-store.ts` and the Vercel Blob store `dezinin-media` through `/api/media`. Local dev still uses Tina’s repo media under `public`. Files already in the repo stay there. The self-hosted editor cannot use Tina’s repo media store.
+- Main page project categories are a dropdown of the existing project filters (`tina/category-select.tsx`).
+- The admin Mail desk is `/editor/mail`. It reads and sends as `info@dezinin.com` through `lib/mailbox.ts` over IMAP and SMTP on `mail.dezinin.com`. The public contact form uses the same helper. Mailbox login stays in environment variables.

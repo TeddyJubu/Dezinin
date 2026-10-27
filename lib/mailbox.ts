@@ -8,11 +8,18 @@ export type MailFolder = { id: "inbox" | "sent"; path: string; label: string };
 
 export type MailSummary = {
   uid: number;
+  seq: number;
   subject: string;
   from: string;
   to: string;
   date: string;
   seen: boolean;
+};
+
+export type MailListOptions = {
+  before?: number;
+  q?: string;
+  unseen?: boolean;
 };
 
 export type MailMessage = MailSummary & {
@@ -106,6 +113,7 @@ function isoDate(value?: Date | string | null) {
 function summary(message: FetchMessageObject): MailSummary {
   return {
     uid: message.uid,
+    seq: message.seq,
     subject: message.envelope?.subject || "(no subject)",
     from: formatAddresses(message.envelope?.from),
     to: formatAddresses(message.envelope?.to),
@@ -121,22 +129,55 @@ function cleanHtml(html: string) {
     .slice(0, 200_000);
 }
 
-export async function listMailbox(requested = "inbox") {
+function cleanQuery(value?: string) {
+  return (value || "").replace(/[\u0000\r\n]/g, " ").trim().slice(0, 200);
+}
+
+async function fetchSummaries(client: ImapFlow, range: string) {
+  const messages: MailSummary[] = [];
+  for await (const message of client.fetch(range, { uid: true, flags: true, envelope: true, internalDate: true })) {
+    messages.push(summary(message));
+  }
+  messages.sort((left, right) => right.seq - left.seq);
+  return messages;
+}
+
+export async function listMailbox(requested = "inbox", options: MailListOptions = {}) {
+  const q = cleanQuery(options.q);
+  const unseen = options.unseen === true;
+  const before = Number.isInteger(options.before) && options.before && options.before > 0 ? options.before : undefined;
+
   return withClient(async (client) => {
     const folders = pickFolders(await client.list());
     const folder = resolveFolder(folders, requested);
     const lock = await client.getMailboxLock(folder.path);
     try {
       const exists = client.mailbox && typeof client.mailbox === "object" ? client.mailbox.exists : 0;
-      const messages: MailSummary[] = [];
-      if (exists) {
-        const start = Math.max(1, exists - LIST_LIMIT + 1);
-        for await (const message of client.fetch(`${start}:*`, { uid: true, flags: true, envelope: true, internalDate: true })) {
-          messages.push(summary(message));
+      const address = settings().from;
+      const empty = { address, folders, folder: folder.path, messages: [] as MailSummary[], hasMore: false };
+      if (before !== undefined && before <= 1) return empty;
+
+      if (q || unseen) {
+        const query: { seen?: false; seq?: string; or?: Array<{ subject: string } | { from: string } | { to: string }> } = {};
+        if (unseen) query.seen = false;
+        if (before) query.seq = `1:${before - 1}`;
+        if (q) {
+          query.or = [{ subject: q }, { from: q }];
+          if (folder.id === "sent") query.or.push({ to: q });
         }
-        messages.reverse();
+        const found = await client.search(query);
+        if (!Array.isArray(found)) throw new Error("The mailbox could not be reached.");
+        const seqs = found.filter((seq) => seq > 0).sort((left, right) => left - right);
+        const page = seqs.slice(-LIST_LIMIT);
+        const messages = page.length ? await fetchSummaries(client, page.join(",")) : [];
+        return { address, folders, folder: folder.path, messages, hasMore: seqs.length > LIST_LIMIT };
       }
-      return { address: settings().from, folders, folder: folder.path, messages };
+
+      const end = before ? before - 1 : exists;
+      if (!end || end < 1) return empty;
+      const start = Math.max(1, end - LIST_LIMIT + 1);
+      const messages = await fetchSummaries(client, `${start}:${end}`);
+      return { address, folders, folder: folder.path, messages, hasMore: start > 1 };
     } finally {
       lock.release();
     }
