@@ -1,6 +1,7 @@
 import { defineConfig, LocalAuthProvider } from "tinacms";
 import { TinaUserCollection, UsernamePasswordAuthJSProvider } from "tinacms-authjs/dist/tinacms";
 import { installDezininBrand } from "./admin-brand";
+import { DezininMediaStore } from "./media-store";
 import { SectionToggle } from "./section-toggle";
 
 const sectionToggle = (name: string, label: string) =>
@@ -37,12 +38,16 @@ export default defineConfig({
     outputFolder: "admin",
     publicFolder: "public",
   },
-  media: {
-    tina: {
-      mediaRoot: "",
-      publicFolder: "public",
-    },
-  },
+  media: isLocal
+    ? {
+        tina: {
+          mediaRoot: "",
+          publicFolder: "public",
+        },
+      }
+    : {
+        loadCustomStore: async () => DezininMediaStore,
+      },
   schema: {
     collections: [
       TinaUserCollection,

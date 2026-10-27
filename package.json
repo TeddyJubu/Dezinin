@@ -6,11 +6,12 @@
   },
   "scripts": {
     "dev": "tinacms dev -c \"next dev --port 3000\"",
-    "build": "tinacms build && node scripts/brand-admin.mjs && next build",
+    "build": "tinacms build && node scripts/brand-admin.mjs && node scripts/media-manifest.mjs && next build",
     "start": "next start"
   },
   "dependencies": {
     "@tinacms/datalayer": "^3.0.0",
+    "@vercel/blob": "^2.8.2",
     "gsap": "^3.15.0",
     "next": "^15.5.6",
     "next-auth": "^4.24.15",
