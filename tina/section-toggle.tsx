@@ -83,7 +83,7 @@ export function SectionToggle({ input, field, form }: SectionToggleProps) {
           role="switch"
           aria-checked={shown}
           aria-label={`${label} visibility`}
-          title={shown ? "Shown" : "Hidden"}
+          data-tooltip={shown ? "Shown" : "Hidden"}
           onClick={() => input.onChange(!shown)}
         >
           <EyeIcon shown={shown} />
@@ -94,7 +94,7 @@ export function SectionToggle({ input, field, form }: SectionToggleProps) {
           data-hot={locked ? "true" : "false"}
           aria-pressed={locked}
           aria-label={locked ? `${label} locked` : `${label} unlocked`}
-          title={locked ? "Locked" : "Unlocked"}
+          data-tooltip={locked ? "Locked" : "Unlocked"}
           onClick={() => {
             const next = !locked;
             setLocked(next);

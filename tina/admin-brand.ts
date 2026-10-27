@@ -108,6 +108,10 @@ html, body.tina-tailwind {
 .tina-tailwind .focus\\:ring-blue-500:focus {
   --tw-ring-color: #fe4101 !important;
 }
+.tina-tailwind select.dezinin-category-select {
+  width: 100%;
+  cursor: pointer;
+}
 .tina-tailwind input,
 .tina-tailwind textarea,
 .tina-tailwind select {
@@ -199,7 +203,6 @@ html, body.tina-tailwind {
 .tina-tailwind a[data-nav-active="true"] {
   background: #221c1a;
   color: #f7f1ea !important;
-  box-shadow: inset 2px 0 0 #fe4101;
 }
 .tina-tailwind .flex.items-stretch.h-dvh > .relative.z-30.w-96 {
   display: flex !important;
@@ -317,6 +320,7 @@ html, body.tina-tailwind {
   flex: none;
 }
 .dezinin-icon-btn {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -329,6 +333,32 @@ html, body.tina-tailwind {
   color: #e4e2df;
   cursor: pointer;
   transition: background-color 0.3s var(--dezinin-ease), color 0.3s var(--dezinin-ease), transform 0.3s var(--dezinin-ease);
+}
+.dezinin-icon-btn::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 8px);
+  padding: 0.32rem 0.5rem;
+  border-radius: 0.45rem;
+  background: #2a2422;
+  color: #f7f1ea;
+  font-family: Montserrat, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  z-index: 5;
+  transition: opacity 0.15s var(--dezinin-ease), visibility 0.15s var(--dezinin-ease);
+}
+.dezinin-icon-btn:hover::after,
+.dezinin-icon-btn:focus-visible::after {
+  opacity: 1;
+  visibility: visible;
 }
 .dezinin-section[data-shown="false"] .dezinin-icon-btn {
   color: #6f6a67;
@@ -436,6 +466,58 @@ html, body.tina-tailwind {
 }
 .tina-tailwind [data-test="list-partners"] > div > div > div > .text-center {
   grid-column: 1 / -1;
+}
+.tina-tailwind div.relative.w-full.max-w-full.flex.justify-start.items-start.gap-3 > button.flex-shrink.min-w-0:has(img) {
+  position: relative;
+}
+.tina-tailwind div.relative.w-full.max-w-full.flex.justify-start.items-start.gap-3 > button.icon-parent.rounded-full {
+  display: none !important;
+}
+.tina-tailwind .dezinin-image-actions {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  border-radius: inherit;
+  background: rgba(18, 15, 14, 0.55);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.2s var(--dezinin-ease), visibility 0.2s var(--dezinin-ease);
+}
+.tina-tailwind div.relative.w-full.max-w-full.flex.justify-start.items-start.gap-3 > button.flex-shrink.min-w-0:hover .dezinin-image-actions,
+.tina-tailwind div.relative.w-full.max-w-full.flex.justify-start.items-start.gap-3 > button.flex-shrink.min-w-0:focus-within .dezinin-image-actions {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+.tina-tailwind .dezinin-image-action {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #1a1614;
+  color: #f7f1ea;
+  border: 1px solid rgba(247, 241, 234, 0.22);
+  box-shadow: 0 8px 20px rgba(18, 15, 14, 0.35);
+  cursor: pointer;
+  font-family: Montserrat, sans-serif;
+  transition: background-color 0.2s var(--dezinin-ease), transform 0.2s var(--dezinin-ease);
+}
+.tina-tailwind .dezinin-image-action:hover,
+.tina-tailwind .dezinin-image-action:focus-visible {
+  background: #fe4101;
+  color: #fff;
+  outline: 2px solid #fe4101;
+  outline-offset: 2px;
+}
+.tina-tailwind .dezinin-image-action:active {
+  transform: scale(0.98);
 }
 `;
 
@@ -645,7 +727,8 @@ function relabelDashboardLink() {
     const walker = document.createTreeWalker(link, NodeFilter.SHOW_TEXT);
     let node = walker.nextNode();
     while (node) {
-      if (node.textContent?.trim() === "Common settings") node.textContent = "Dashboard";
+      const label = node.textContent?.trim();
+      if (label === "Common settings" || label === "Dashboard") node.textContent = "Basic settings";
       node = walker.nextNode();
     }
   });
@@ -725,6 +808,88 @@ function keepSingletonBackInEditor(event: Event, cms: EditorCms) {
   window.location.hash = DASHBOARD;
 }
 
+const IMAGE_PREVIEW_ROW = "div.relative.w-full.max-w-full.flex.justify-start.items-start.gap-3";
+
+function imageActionIcon(kind: "upload" | "delete") {
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("viewBox", "0 0 24 24");
+  svg.setAttribute("width", "18");
+  svg.setAttribute("height", "18");
+  svg.setAttribute("fill", "none");
+  svg.setAttribute("aria-hidden", "true");
+  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  path.setAttribute("stroke", "currentColor");
+  path.setAttribute("stroke-width", "1.75");
+  path.setAttribute("stroke-linecap", "round");
+  path.setAttribute("stroke-linejoin", "round");
+  path.setAttribute(
+    "d",
+    kind === "delete"
+      ? "M5 7h14M9.5 7V5.5A1.5 1.5 0 0 1 11 4h2a1.5 1.5 0 0 1 1.5 1.5V7M7 7l.8 12.2A1.5 1.5 0 0 0 9.3 20.6h5.4a1.5 1.5 0 0 0 1.5-1.4L16.9 7"
+      : "M12 16V5.5M12 5.5 7.5 10M12 5.5 16.5 10M5 16.5V18a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-1.5",
+  );
+  svg.appendChild(path);
+  return svg;
+}
+
+function imageAction(kind: "upload" | "delete", label: string) {
+  const control = document.createElement("span");
+  control.className = "dezinin-image-action";
+  control.dataset.dezininImageAction = kind;
+  control.setAttribute("role", "button");
+  control.tabIndex = 0;
+  control.setAttribute("aria-label", label);
+  control.appendChild(imageActionIcon(kind));
+  return control;
+}
+
+function mountImageActions() {
+  document.querySelectorAll<HTMLElement>(IMAGE_PREVIEW_ROW).forEach((row) => {
+    const preview = row.querySelector<HTMLButtonElement>(":scope > button.flex-shrink.min-w-0");
+    const clear = row.querySelector<HTMLButtonElement>(":scope > button.icon-parent.rounded-full");
+    const image = preview?.querySelector("img");
+    const existing = preview?.querySelector<HTMLElement>("[data-dezinin-image-actions]");
+    if (!preview || !clear || !image?.getAttribute("src")) {
+      existing?.remove();
+      return;
+    }
+    if (existing) return;
+    const actions = document.createElement("span");
+    actions.className = "dezinin-image-actions";
+    actions.dataset.dezininImageActions = "";
+    actions.append(imageAction("delete", "Remove image"), imageAction("upload", "Upload image"));
+    preview.appendChild(actions);
+  });
+}
+
+function onImageActionClick(event: Event) {
+  const target = event.target;
+  if (!(target instanceof Element)) return;
+  const action = target.closest<HTMLElement>("[data-dezinin-image-action]");
+  if (!action) return;
+  const preview = action.closest("button");
+  if (!(preview instanceof HTMLButtonElement)) return;
+  event.preventDefault();
+  event.stopPropagation();
+  const kind = action.dataset.dezininImageAction;
+  if (kind === "delete") {
+    preview.parentElement?.querySelector<HTMLButtonElement>(":scope > button.icon-parent.rounded-full")?.click();
+    return;
+  }
+  if (kind === "upload") preview.click();
+}
+
+function onImageActionKeydown(event: KeyboardEvent) {
+  if (event.key !== "Enter" && event.key !== " ") return;
+  const target = event.target;
+  if (!(target instanceof Element)) return;
+  const action = target.closest<HTMLElement>("[data-dezinin-image-action]");
+  if (!action) return;
+  event.preventDefault();
+  event.stopPropagation();
+  action.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+}
+
 export function installDezininBrand<T>(cms: T): T {
   if (typeof document === "undefined") return cms;
   const branded = window as Window & { __dezininBrand?: boolean };
@@ -750,6 +915,7 @@ export function installDezininBrand<T>(cms: T): T {
     markSections();
     markNav();
     mountDashboard(editor);
+    mountImageActions();
   };
   paint();
   const observer = new MutationObserver((records) => {
@@ -766,6 +932,7 @@ export function installDezininBrand<T>(cms: T): T {
       markSections();
       markNav();
       mountDashboard(editor);
+      mountImageActions();
     }
   });
   observer.observe(document.body, { subtree: true, childList: true, characterData: true });
@@ -775,6 +942,8 @@ export function installDezininBrand<T>(cms: T): T {
   }, 0));
   document.addEventListener("click", (event) => keepSingletonBackInEditor(event, editor), true);
   document.addEventListener("click", keepNavigationOpen, true);
+  document.addEventListener("click", onImageActionClick, true);
+  document.addEventListener("keydown", onImageActionKeydown, true);
   repairPreviewHash();
   window.addEventListener("hashchange", () => {
     repairPreviewHash();

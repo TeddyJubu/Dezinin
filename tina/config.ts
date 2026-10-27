@@ -2,6 +2,7 @@ import { defineConfig, LocalAuthProvider } from "tinacms";
 import { TinaUserCollection, UsernamePasswordAuthJSProvider } from "tinacms-authjs/dist/tinacms";
 import { installDezininBrand } from "./admin-brand";
 import { DezininMediaStore } from "./media-store";
+import { CategorySelect } from "./category-select";
 import { SectionToggle } from "./section-toggle";
 
 const sectionToggle = (name: string, label: string) =>
@@ -144,7 +145,13 @@ export default defineConfig({
             fields: [
               { type: "string", name: "number", label: "Number" },
               { type: "string", name: "title", label: "Title", required: true },
-              { type: "string", name: "categories", label: "Categories", list: true },
+              {
+                type: "string",
+                name: "categories",
+                label: "Categories",
+                list: true,
+                ui: { field: { component: CategorySelect } },
+              },
               { type: "image", name: "image", label: "Image" },
               { type: "string", name: "summary", label: "Summary", ui: { component: "textarea" } },
             ],
