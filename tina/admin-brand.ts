@@ -843,13 +843,18 @@ function imageAction(kind: "upload" | "delete", label: string) {
   return control;
 }
 
+function imageClearButton(preview: HTMLButtonElement) {
+  const sibling = preview.parentElement?.querySelector<HTMLButtonElement>(":scope > button.icon-parent.rounded-full");
+  if (sibling) return sibling;
+  return preview.closest<HTMLElement>('[aria-roledescription="sortable"]')?.querySelector<HTMLButtonElement>(":scope > button") ?? null;
+}
+
 function mountImageActions() {
   document.querySelectorAll<HTMLElement>(IMAGE_PREVIEW_ROW).forEach((row) => {
     const preview = row.querySelector<HTMLButtonElement>(":scope > button.flex-shrink.min-w-0");
-    const clear = row.querySelector<HTMLButtonElement>(":scope > button.icon-parent.rounded-full");
     const image = preview?.querySelector("img");
     const existing = preview?.querySelector<HTMLElement>("[data-dezinin-image-actions]");
-    if (!preview || !clear || !image?.getAttribute("src")) {
+    if (!preview || !image?.getAttribute("src") || !imageClearButton(preview)) {
       existing?.remove();
       return;
     }
@@ -873,7 +878,7 @@ function onImageActionClick(event: Event) {
   event.stopPropagation();
   const kind = action.dataset.dezininImageAction;
   if (kind === "delete") {
-    preview.parentElement?.querySelector<HTMLButtonElement>(":scope > button.icon-parent.rounded-full")?.click();
+    imageClearButton(preview)?.click();
     return;
   }
   if (kind === "upload") preview.click();
