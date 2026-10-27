@@ -42,14 +42,14 @@ export async function POST(request: Request) {
   if (!mailIsConfigured()) return Response.json({ error: "Mail is not configured" }, { status: 503 });
   const body = (await request.json()) as { to?: string; cc?: string; subject?: string; text?: string; replyTo?: string };
   try {
-    await sendMail({
+    const result = await sendMail({
       to: body.to || "",
       cc: body.cc,
       subject: body.subject || "",
       text: body.text || "",
       replyTo: body.replyTo,
     });
-    return Response.json({ ok: true });
+    return Response.json({ ok: true, saved: result.saved });
   } catch (error) {
     const message = publicMailError(error);
     const status = message === "Enter a valid email address" || message === "Subject and message are required" ? 400 : 502;

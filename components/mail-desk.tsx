@@ -285,7 +285,7 @@ export function MailDesk() {
       }
       setComposing(false);
       setDraft({ to: "", cc: "", subject: "", text: "" });
-      setSentNotice(`Sent as ${address}.`);
+      setSentNotice(body.saved === false ? `Sent as ${address}. A copy was not saved in Sent.` : `Sent as ${address}.`);
       if (folder === "sent") void loadList({ folder: "sent" });
     } catch {
       setError("The message was not sent.");

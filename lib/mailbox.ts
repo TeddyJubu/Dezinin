@@ -236,6 +236,11 @@ function headerValue(value: string) {
   return value.replace(/[\r\n]+/g, " ").trim().slice(0, 500);
 }
 
+function plainMessage(headers: Array<[string, string]>, text: string) {
+  const lines = headers.filter(([, value]) => value).map(([name, value]) => `${name}: ${headerValue(value)}`);
+  return [...lines, "MIME-Version: 1.0", "Content-Type: text/plain; charset=utf-8", "", text.replace(/\r?\n/g, "\r\n")].join("\r\n");
+}
+
 export async function sendMail(input: { to: string; cc?: string; subject: string; text: string; replyTo?: string }) {
   const mail = settings();
   if (!mail.configured) throw new Error("Mail is not configured");
@@ -253,28 +258,59 @@ export async function sendMail(input: { to: string; cc?: string; subject: string
     greetingTimeout: 20000,
     socketTimeout: 30000,
   });
+  const replyTo = input.replyTo ? headerValue(input.replyTo) : "";
   await transport.sendMail({
     from: mail.from,
     to,
     cc,
-    replyTo: input.replyTo ? headerValue(input.replyTo) : undefined,
+    replyTo: replyTo || undefined,
     subject,
     text,
+  });
+  try {
+    await saveSentCopy({ from: mail.from, to, cc, replyTo, subject, text });
+    return { saved: true };
+  } catch (error) {
+    console.error("mail sent copy", error instanceof Error ? error.message : error);
+    return { saved: false };
+  }
+}
+
+async function saveSentCopy(input: { from: string; to: string; cc?: string; replyTo?: string; subject: string; text: string }) {
+  const raw = plainMessage(
+    [
+      ["From", input.from],
+      ["To", input.to],
+      ["Cc", input.cc || ""],
+      ["Reply-To", input.replyTo || ""],
+      ["Subject", input.subject],
+      ["Date", new Date().toUTCString()],
+    ],
+    input.text,
+  );
+  await withClient(async (client) => {
+    const sent = pickFolders(await client.list()).find((folder) => folder.id === "sent");
+    if (!sent) throw new Error("Unknown folder");
+    const lock = await client.getMailboxLock(sent.path);
+    try {
+      await client.append(sent.path, raw, ["\\Seen"]);
+    } finally {
+      lock.release();
+    }
   });
 }
 
 export async function keepCopy(input: { from: string; subject: string; text: string }) {
   const mail = settings();
-  const raw = [
-    `From: ${headerValue(input.from)}`,
-    `To: ${headerValue(mail.from)}`,
-    `Subject: ${headerValue(input.subject)}`,
-    `Date: ${new Date().toUTCString()}`,
-    "MIME-Version: 1.0",
-    "Content-Type: text/plain; charset=utf-8",
-    "",
-    input.text.replace(/\r?\n/g, "\r\n"),
-  ].join("\r\n");
+  const raw = plainMessage(
+    [
+      ["From", input.from],
+      ["To", mail.from],
+      ["Subject", input.subject],
+      ["Date", new Date().toUTCString()],
+    ],
+    input.text,
+  );
   await withClient(async (client) => {
     const lock = await client.getMailboxLock("INBOX");
     try {
