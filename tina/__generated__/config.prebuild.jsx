@@ -629,15 +629,54 @@ function markNav() {
     else link.removeAttribute("data-nav-active");
   });
 }
+function envelopeIcon(sample) {
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("viewBox", "0 0 24 24");
+  svg.setAttribute("width", sample?.getAttribute("width") || "20");
+  svg.setAttribute("height", sample?.getAttribute("height") || "20");
+  svg.setAttribute("fill", "none");
+  svg.setAttribute("stroke", "currentColor");
+  svg.setAttribute("stroke-width", sample?.getAttribute("stroke-width") || "2");
+  svg.setAttribute("stroke-linecap", "round");
+  svg.setAttribute("stroke-linejoin", "round");
+  svg.setAttribute("aria-hidden", "true");
+  const sampleClass = sample?.getAttribute("class");
+  if (sampleClass) svg.setAttribute("class", sampleClass);
+  const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+  rect.setAttribute("width", "20");
+  rect.setAttribute("height", "16");
+  rect.setAttribute("x", "2");
+  rect.setAttribute("y", "4");
+  rect.setAttribute("rx", "2");
+  const flap = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  flap.setAttribute("d", "m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7");
+  svg.append(rect, flap);
+  return svg;
+}
 function mountMailLink() {
   const list = document.querySelector("ul.flex.flex-col.gap-4");
-  if (!list || list.querySelector('a[href="#/mail"]')) return;
+  if (!list) return;
   const sample = list.querySelector("a");
   if (!sample) return;
-  const link = document.createElement("a");
+  const existing = list.querySelector('a[href="#/mail"]');
+  if (existing instanceof HTMLAnchorElement) {
+    if (!existing.querySelector("svg")) existing.prepend(envelopeIcon(sample.querySelector("svg")));
+    return;
+  }
+  const link = sample.cloneNode(true);
   link.href = "#/mail";
-  link.className = sample.className;
-  link.textContent = "Mail";
+  link.removeAttribute("data-nav-active");
+  const icon = link.querySelector("svg");
+  const envelope = envelopeIcon(icon);
+  if (icon) icon.replaceWith(envelope);
+  else link.prepend(envelope);
+  const texts = [];
+  const walker = document.createTreeWalker(link, NodeFilter.SHOW_TEXT);
+  while (walker.nextNode()) texts.push(walker.currentNode);
+  texts.forEach((node, index) => {
+    node.textContent = index === texts.length - 1 ? "Mail" : "";
+  });
+  if (!texts.length) link.append("Mail");
   const item = document.createElement("li");
   item.appendChild(link);
   list.appendChild(item);

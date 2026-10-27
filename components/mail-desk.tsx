@@ -15,7 +15,9 @@ const deskCss = `
   flex-direction: column;
   background: #120f0e;
   color: #e4e2df;
-  font-family: Montserrat, sans-serif;
+  font-family: var(--font-inter), Inter, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
 }
 body:has(main.mail-desk) {
   margin: 0;
@@ -118,10 +120,10 @@ const labelStyle: CSSProperties = {
   display: "grid",
   gap: 6,
   color: "#a39e9b",
-  fontSize: 13,
+  fontSize: 15,
 };
 
-export function MailDesk() {
+export function MailDesk({ fontClassName = "" }: { fontClassName?: string }) {
   const [address, setAddress] = useState("info@dezinin.com");
   const [configured, setConfigured] = useState(true);
   const [folders, setFolders] = useState<Folder[]>([]);
@@ -318,7 +320,7 @@ export function MailDesk() {
   const reading = composing || selected !== null;
 
   return (
-    <main className="mail-desk" data-reading={reading ? "true" : "false"}>
+    <main className={`mail-desk ${fontClassName}`.trim()} data-reading={reading ? "true" : "false"}>
       <style>{deskCss}</style>
       <header style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 16, padding: "18px 22px", borderBottom: "1px solid #2a2422", flexShrink: 0 }}>
         <div>
@@ -414,11 +416,11 @@ export function MailDesk() {
                       font: "inherit",
                     }}
                   >
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 12, fontSize: 12, color: "#a39e9b" }}>
-                      <span style={{ fontWeight: item.seen ? 500 : 700, color: "#f7f1ea", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{party}</span>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 12, color: item.seen ? "#8b8988" : "#a39e9b" }}>
+                      <span style={{ fontWeight: item.seen ? 500 : 700, color: item.seen ? "#a39e9b" : "#f7f1ea", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{party}</span>
                       <span style={{ whiteSpace: "nowrap", flexShrink: 0 }}>{when(item.date)}</span>
                     </div>
-                    <div style={{ marginTop: 4, fontWeight: item.seen ? 500 : 700 }}>{item.subject}</div>
+                    <div style={{ marginTop: 4, fontWeight: item.seen ? 500 : 700, color: item.seen ? "#a39e9b" : "#f7f1ea" }}>{item.subject}</div>
                   </button>
                 );
               })}
@@ -485,7 +487,7 @@ export function MailDesk() {
                   <button type="button" onClick={reply} style={{ ...tabStyle(false), marginBottom: 18 }}>
                     Reply
                   </button>
-                  <pre style={{ whiteSpace: "pre-wrap", fontFamily: "inherit", lineHeight: 1.6, margin: 0 }}>{message.text}</pre>
+                  <pre style={{ whiteSpace: "pre-wrap", fontFamily: "inherit", fontSize: 15, lineHeight: 1.6, margin: 0 }}>{message.text}</pre>
                   {message.html ? (
                     <button type="button" onClick={() => setFormatted((value) => !value)} style={{ ...tabStyle(false), marginTop: 18 }}>
                       {formatted ? "Hide formatted message" : "Show formatted message"}
