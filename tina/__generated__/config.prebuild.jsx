@@ -97,15 +97,16 @@ function repairPreviewHash() {
   history.replaceState(history.state, "", `${pathname}${search}${next}`);
   window.dispatchEvent(new HashChangeEvent("hashchange"));
 }
+var MAIN_PAGE = "#/collections/edit/home/index";
 function keepSingletonBackInEditor(event) {
   const target = event.target;
   if (!(target instanceof Element)) return;
-  const button = target.closest("button[aria-label='Back to Main page'], button[aria-label='Back to Common settings']");
+  const button = target.closest("button[aria-label^='Back to']");
   if (!button || !window.location.hash.startsWith("#/collections/edit/")) return;
   event.preventDefault();
   event.stopPropagation();
-  if (history.length > 1) history.back();
-  else window.location.hash = "#/";
+  if (window.location.hash === MAIN_PAGE) return;
+  window.location.hash = MAIN_PAGE;
 }
 function installDezininBrand(cms) {
   if (typeof document === "undefined") return cms;

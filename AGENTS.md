@@ -5,7 +5,7 @@
 - Authenticate the production admin with Auth.js on a self-hosted backend, and do not use paid TinaCloud.
 - White-label the admin with the Dezinin brand identity and remove TinaCMS branding.
 - Keep version control in a local git repository and commit after every change. Do not push unless asked.
-- Keep admin Back navigation inside the editor. Common settings and Main page must not share one preview route, and Back must return to the editor menu.
+- Keep admin Back navigation inside the editor. Every collection Back button goes to Main page (`#/collections/edit/home/index`). Common settings and Main page must not share one preview route.
 
 ## Learned Workspace Facts
 

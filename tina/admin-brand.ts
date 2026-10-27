@@ -98,15 +98,17 @@ function repairPreviewHash() {
   window.dispatchEvent(new HashChangeEvent("hashchange"));
 }
 
+const MAIN_PAGE = "#/collections/edit/home/index";
+
 function keepSingletonBackInEditor(event: Event) {
   const target = event.target;
   if (!(target instanceof Element)) return;
-  const button = target.closest("button[aria-label='Back to Main page'], button[aria-label='Back to Common settings']");
+  const button = target.closest("button[aria-label^='Back to']");
   if (!button || !window.location.hash.startsWith("#/collections/edit/")) return;
   event.preventDefault();
   event.stopPropagation();
-  if (history.length > 1) history.back();
-  else window.location.hash = "#/";
+  if (window.location.hash === MAIN_PAGE) return;
+  window.location.hash = MAIN_PAGE;
 }
 
 export function installDezininBrand<T>(cms: T): T {
