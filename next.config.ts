@@ -16,6 +16,22 @@ const nextConfig: NextConfig = {
     "/design-lab": ["./content/**/*", "./tina/**/*"],
     "/newsletters/[slug]": ["./content/**/*", "./tina/**/*"],
   },
+  async headers() {
+    return [
+      {
+        source: "/video/:path*",
+        headers: [{ key: "Cache-Control", value: "public, max-age=604800, stale-while-revalidate=2592000" }],
+      },
+      {
+        source: "/images/:path*",
+        headers: [{ key: "Cache-Control", value: "public, max-age=604800, stale-while-revalidate=2592000" }],
+      },
+      {
+        source: "/icons/:path*",
+        headers: [{ key: "Cache-Control", value: "public, max-age=604800, stale-while-revalidate=2592000" }],
+      },
+    ];
+  },
   async redirects() {
     return legacyRedirects;
   },

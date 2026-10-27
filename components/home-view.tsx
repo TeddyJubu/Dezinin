@@ -20,6 +20,17 @@ function commandVideo(frame: HTMLIFrameElement | null, command: "playVideo" | "p
   frame?.contentWindow?.postMessage(JSON.stringify({ event: "command", func: command, args: [] }), "*");
 }
 
+function slideDistance(index: number, active: number, count: number) {
+  const a = ((index % count) + count) % count;
+  const b = ((active % count) + count) % count;
+  return Math.min(Math.abs(a - b), count - Math.abs(a - b));
+}
+
+function heroPoster(src?: string | null) {
+  if (src === "/video/hypetown_hero.mp4") return "/video/hypetown_hero-poster.jpg";
+  return undefined;
+}
+
 function GallerySlider({ title, videos }: { title?: string | null; videos: HomeContent["videos"] }) {
   const clips = (videos || []).flatMap((video) => {
     const id = youtubeIdFrom(video?.youtubeId);
@@ -68,25 +79,30 @@ function GallerySlider({ title, videos }: { title?: string | null; videos: HomeC
           {slides.map((video, index) => {
             const id = video.youtubeId || "";
             const playing = index === active;
+            const near = slideDistance(index, active, clips.length) <= 1;
             return (
               <SwiperSlide key={`${id}-${index}`}>
                 <div className="videoSlider-module__5JS_Uq__videoWrapper">
-                  <iframe
-                    ref={(node) => {
-                      frames.current[index] = node;
-                    }}
-                    src={`https://www.youtube-nocookie.com/embed/${id}?enablejsapi=1&mute=1&loop=1&playlist=${id}&controls=1&rel=0&playsinline=1`}
-                    title={video.title || "Gallery video"}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    sandbox="allow-scripts allow-same-origin allow-presentation allow-popups allow-popups-to-escape-sandbox"
-                    referrerPolicy="strict-origin-when-cross-origin"
-                    allowFullScreen
-                    className="videoSlider-module__5JS_Uq__slideVideo"
-                    loading="lazy"
-                    onLoad={() => {
-                      if (playing) commandVideo(frames.current[index], "playVideo");
-                    }}
-                  />
+                  {near ? (
+                    <iframe
+                      ref={(node) => {
+                        frames.current[index] = node;
+                      }}
+                      src={`https://www.youtube-nocookie.com/embed/${id}?enablejsapi=1&mute=1&loop=1&playlist=${id}&controls=1&rel=0&playsinline=1`}
+                      title={video.title || "Gallery video"}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      sandbox="allow-scripts allow-same-origin allow-presentation allow-popups allow-popups-to-escape-sandbox"
+                      referrerPolicy="strict-origin-when-cross-origin"
+                      allowFullScreen
+                      className="videoSlider-module__5JS_Uq__slideVideo"
+                      loading="lazy"
+                      onLoad={() => {
+                        if (playing) commandVideo(frames.current[index], "playVideo");
+                      }}
+                    />
+                  ) : (
+                    <img alt="" src={`https://i.ytimg.com/vi/${id}/hqdefault.jpg`} className="videoSlider-module__5JS_Uq__slideVideo object-cover" loading="lazy" decoding="async" />
+                  )}
                   {playing ? null : <div className="videoSlider-module__5JS_Uq__touchOverlay" />}
                 </div>
               </SwiperSlide>
@@ -150,7 +166,7 @@ export function HomeView({
       {sectionVisible(home.showHero) && <section id="hero" className="relative h-screen">
         <div className="relative w-full h-full overflow-hidden">
           <div className="absolute inset-0 z-0">
-            <video autoPlay muted loop playsInline className="absolute top-1/2 left-1/2 min-w-full min-h-full w-auto h-auto -translate-x-1/2 -translate-y-1/2 object-cover">
+            <video autoPlay muted loop playsInline preload="metadata" poster={heroPoster(home.heroVideo)} className="absolute top-1/2 left-1/2 min-w-full min-h-full w-auto h-auto -translate-x-1/2 -translate-y-1/2 object-cover">
               <source src={mediaUrl(home.heroVideo)} type="video/mp4" />
             </video>
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
@@ -164,7 +180,7 @@ export function HomeView({
           <div className="grid" style={{ gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: "2.5rem 1.5rem" }}>
             {partners.map((logo) => (
               <div key={logo} className="flex items-center justify-center">
-                <img alt="" src={mediaUrl(logo)} className="w-auto max-w-full object-contain" style={{ height: "clamp(4.5rem, 8vw, 8rem)" }} />
+                <img alt="" src={mediaUrl(logo)} loading="lazy" decoding="async" fetchPriority="low" className="w-auto max-w-full object-contain" style={{ height: "clamp(4.5rem, 8vw, 8rem)" }} />
               </div>
             ))}
           </div>
@@ -195,7 +211,7 @@ export function HomeView({
                   <div className="group relative grid gap-6 md:grid-cols-2 md:items-center md:gap-12 lg:gap-20">
                     <div className={index % 2 ? "md:order-2" : ""}>
                       <div className="relative aspect-[4/3] overflow-hidden">
-                        <img alt={project.title || ""} src={mediaUrl(project.image)} className="object-cover absolute inset-0 h-full w-full transition-transform duration-[1200ms] group-hover:scale-[1.06]" />
+                        <img alt={project.title || ""} src={mediaUrl(project.image)} loading="lazy" decoding="async" fetchPriority="low" className="object-cover absolute inset-0 h-full w-full transition-transform duration-[1200ms] group-hover:scale-[1.06]" />
                         <div className="absolute inset-0 bg-black/20 transition-colors duration-500 group-hover:bg-black/0" />
                       </div>
                     </div>
