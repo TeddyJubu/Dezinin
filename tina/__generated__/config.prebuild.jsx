@@ -845,6 +845,69 @@ function envelopeIcon(sample) {
   svg.append(rect, flap);
   return svg;
 }
+var NAV_ICONS = {
+  site: [
+    {
+      tag: "path",
+      attrs: {
+        d: "M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"
+      }
+    },
+    { tag: "circle", attrs: { cx: "12", cy: "12", r: "3" } }
+  ],
+  home: [
+    { tag: "path", attrs: { d: "M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" } },
+    {
+      tag: "path",
+      attrs: {
+        d: "M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"
+      }
+    }
+  ],
+  newsletter: [
+    { tag: "rect", attrs: { width: "7", height: "7", x: "3", y: "3", rx: "1" } },
+    { tag: "rect", attrs: { width: "7", height: "7", x: "14", y: "3", rx: "1" } },
+    { tag: "rect", attrs: { width: "7", height: "7", x: "14", y: "14", rx: "1" } },
+    { tag: "rect", attrs: { width: "7", height: "7", x: "3", y: "14", rx: "1" } }
+  ],
+  page: [
+    { tag: "path", attrs: { d: "M20 7h-3a2 2 0 0 1-2-2V2" } },
+    { tag: "path", attrs: { d: "M9 18a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h7l4 4v10a2 2 0 0 1-2 2Z" } },
+    { tag: "path", attrs: { d: "M3 7.6v12.8A1.6 1.6 0 0 0 4.6 22h9.8" } }
+  ]
+};
+function navIcon(sample, parts) {
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("viewBox", "0 0 24 24");
+  svg.setAttribute("width", sample?.getAttribute("width") || "20");
+  svg.setAttribute("height", sample?.getAttribute("height") || "20");
+  svg.setAttribute("fill", "none");
+  svg.setAttribute("stroke", "currentColor");
+  svg.setAttribute("stroke-width", sample?.getAttribute("stroke-width") || "2");
+  svg.setAttribute("stroke-linecap", "round");
+  svg.setAttribute("stroke-linejoin", "round");
+  svg.setAttribute("aria-hidden", "true");
+  svg.dataset.dezininIcon = "true";
+  const sampleClass = sample?.getAttribute("class");
+  if (sampleClass) svg.setAttribute("class", sampleClass);
+  for (const part of parts) {
+    const node = document.createElementNS("http://www.w3.org/2000/svg", part.tag);
+    for (const [name, value] of Object.entries(part.attrs)) node.setAttribute(name, value);
+    svg.appendChild(node);
+  }
+  return svg;
+}
+function mountNavIcons() {
+  document.querySelectorAll("a[href^='#/collections/']").forEach((link) => {
+    const name = (link.getAttribute("href") || "").match(/#\/collections\/([^/?#]+)/)?.[1] || "";
+    const parts = NAV_ICONS[name];
+    if (!parts || link.querySelector("svg[data-dezinin-icon]")) return;
+    const current = link.querySelector("svg");
+    const icon = navIcon(current, parts);
+    if (current) current.replaceWith(icon);
+    else link.prepend(icon);
+  });
+}
 function mountMailLink() {
   const list = document.querySelector("ul.flex.flex-col.gap-4");
   if (!list) return;
@@ -1367,6 +1430,7 @@ function installDezininBrand(cms) {
     markSections();
     markNav();
     mountMailLink();
+    mountNavIcons();
     mountMail();
     mountDashboard(editor);
     mountImageActions();
@@ -1390,6 +1454,7 @@ function installDezininBrand(cms) {
       markSections();
       markNav();
       mountMailLink();
+      mountNavIcons();
       mountMail();
       mountDashboard(editor);
       mountImageActions();
@@ -1418,6 +1483,7 @@ function installDezininBrand(cms) {
     openDashboard();
     markNav();
     mountMailLink();
+    mountNavIcons();
     mountMail();
     mountDashboard(editor);
     if (isMoodboardList()) moodboardStale = true;
