@@ -560,6 +560,125 @@ html, body.tina-tailwind {
 .tina-tailwind button.dezinin-file-card:focus-within span.text-gray-500 {
   padding-right: 5.6rem;
 }
+.tina-tailwind .dezinin-moodboard-list > .max-w-screen-xl {
+  display: none !important;
+}
+.tina-tailwind .dezinin-pockets {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  gap: 1.4rem 1rem;
+  padding: 0.35rem 0 2.5rem;
+}
+.tina-tailwind .dezinin-pocket {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 15.1rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.tina-tailwind .dezinin-pocket-sheet {
+  position: absolute;
+  z-index: 1;
+  left: 8%;
+  right: 8%;
+  top: 0.15rem;
+  height: 8.7rem;
+  overflow: hidden;
+  border-radius: 0.3rem 0.3rem 0.1rem 0.1rem;
+  background: #fe4101;
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.4);
+  transform: rotate(-1.7deg);
+  transform-origin: 50% 100%;
+  transition: transform 0.35s var(--dezinin-ease);
+}
+.tina-tailwind .dezinin-pocket:nth-child(3n + 2) .dezinin-pocket-sheet {
+  transform: rotate(1.5deg);
+}
+.tina-tailwind .dezinin-pocket:nth-child(3n) .dezinin-pocket-sheet {
+  transform: rotate(-0.6deg);
+}
+.tina-tailwind .dezinin-pocket:hover .dezinin-pocket-sheet,
+.tina-tailwind .dezinin-pocket:focus-visible .dezinin-pocket-sheet {
+  transform: translateY(-0.75rem) rotate(-0.3deg);
+}
+.tina-tailwind .dezinin-pocket-sheet img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 22%;
+}
+.tina-tailwind .dezinin-pocket-sheet::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow: inset 0 0 0 1px rgba(247, 241, 234, 0.28);
+}
+.tina-tailwind .dezinin-pocket-sleeve {
+  position: absolute;
+  z-index: 2;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 7.55rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0.35rem;
+  padding: 1.2rem 0.95rem 0.95rem;
+  border-radius: 0.2rem 0.2rem 0.95rem 0.95rem;
+  background: linear-gradient(180deg, #3c322c 0 0.72rem, #1b1614 0.72rem);
+  border: 1px solid #3a3330;
+  box-shadow: inset 0 1px 0 rgba(247, 241, 234, 0.16), 0 18px 32px rgba(0, 0, 0, 0.32);
+  transition: border-color 0.25s var(--dezinin-ease);
+}
+.tina-tailwind .dezinin-pocket-sleeve::before {
+  content: "";
+  position: absolute;
+  left: 0.6rem;
+  right: 0.6rem;
+  top: 0.22rem;
+  height: 0.38rem;
+  border-radius: 999px;
+  background: rgba(18, 15, 14, 0.62);
+  box-shadow: 0 7px 10px rgba(0, 0, 0, 0.38);
+}
+.tina-tailwind .dezinin-pocket:hover .dezinin-pocket-sleeve,
+.tina-tailwind .dezinin-pocket:focus-visible .dezinin-pocket-sleeve {
+  border-color: #fe4101;
+}
+.tina-tailwind .dezinin-pocket:focus-visible {
+  outline: 2px solid #fe4101;
+  outline-offset: 3px;
+  border-radius: 1rem;
+}
+.tina-tailwind .dezinin-pocket-title {
+  color: #f7f1ea;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.035em;
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.tina-tailwind .dezinin-pocket-file {
+  color: #fe4101;
+  font-size: 0.68rem;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .tina-tailwind .dezinin-image-action {
   width: 2.25rem;
   height: 2.25rem;
@@ -1101,6 +1220,127 @@ function onImageActionKeydown(event) {
   event.stopPropagation();
   action.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
 }
+var moodboardCache = null;
+var moodboardRequest = null;
+var moodboardStale = true;
+function isMoodboardList() {
+  const hash = documentHash();
+  return hash === "#/collections/newsletter" || hash === "#/collections/newsletter/~";
+}
+function moodboardRows() {
+  return [...document.querySelectorAll(".py-4.px-6 tbody tr")].flatMap((row) => {
+    const cells = [...row.querySelectorAll("td")];
+    const filename = (cells[1]?.textContent || "").trim();
+    const extension = (cells[2]?.textContent || "").trim();
+    if (!filename || !row.querySelector("a")) return [];
+    const relative = extension.startsWith(".") ? `${filename}${extension}` : filename;
+    const title = row.querySelector(".leading-5")?.textContent?.trim() || filename;
+    return [{ relative, title }];
+  });
+}
+function loadMoodboard() {
+  if (moodboardCache && !moodboardStale) return Promise.resolve(moodboardCache);
+  if (!moodboardRequest) {
+    moodboardRequest = fetch("/api/tina/gql", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        query: `query MoodboardCards($first: Float) {
+          newsletterConnection(first: $first, sort: "order") {
+            edges { node { title cover pdf ... on Document { _sys { relativePath } } } }
+          }
+        }`,
+        variables: { first: 100 }
+      })
+    }).then((response) => response.json()).then((payload) => {
+      const next = /* @__PURE__ */ new Map();
+      for (const edge of payload.data?.newsletterConnection?.edges || []) {
+        const node = edge?.node;
+        const relative = node?._sys?.relativePath;
+        if (!node || !relative) continue;
+        next.set(relative, { title: node.title || "", cover: node.cover || "", pdf: node.pdf || "" });
+      }
+      moodboardCache = next;
+      moodboardStale = false;
+      return next;
+    }).catch(() => moodboardCache ?? /* @__PURE__ */ new Map()).finally(() => {
+      moodboardRequest = null;
+    });
+  }
+  return moodboardRequest;
+}
+function pocketCard(relative, title, doc) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "dezinin-pocket";
+  button.dataset.moodboard = relative;
+  button.setAttribute("aria-label", doc?.title || title);
+  const sheet = document.createElement("span");
+  sheet.className = "dezinin-pocket-sheet";
+  sheet.setAttribute("aria-hidden", "true");
+  if (doc?.cover) {
+    const image = document.createElement("img");
+    image.src = doc.cover;
+    image.alt = "";
+    sheet.appendChild(image);
+  }
+  const sleeve = document.createElement("span");
+  sleeve.className = "dezinin-pocket-sleeve";
+  const heading = document.createElement("span");
+  heading.className = "dezinin-pocket-title";
+  heading.textContent = doc?.title || title;
+  const file = document.createElement("span");
+  file.className = "dezinin-pocket-file";
+  file.textContent = doc?.pdf ? fileName(doc.pdf) : "No PDF";
+  sleeve.append(heading, file);
+  button.append(sheet, sleeve);
+  return button;
+}
+function openMoodboard(relative) {
+  const link = [...document.querySelectorAll(".py-4.px-6 tbody a")].find(
+    (anchor) => (anchor.textContent || "").includes(relative)
+  );
+  if (!link) return;
+  const propsKey = Object.keys(link).find((name) => name.startsWith("__reactProps$"));
+  const props = propsKey ? link[propsKey] : void 0;
+  if (props?.onClick) props.onClick();
+  else link.click();
+}
+function onPocketClick(event) {
+  const target = event.target;
+  if (!(target instanceof Element)) return;
+  const button = target.closest("button.dezinin-pocket");
+  const relative = button?.dataset.moodboard;
+  if (!relative) return;
+  event.preventDefault();
+  event.stopPropagation();
+  openMoodboard(relative);
+}
+function mountMoodboardCards() {
+  const page = document.querySelector(".py-4.px-6");
+  if (!isMoodboardList() || !page) {
+    document.querySelector(".dezinin-pockets")?.remove();
+    document.querySelector(".dezinin-moodboard-list")?.classList.remove("dezinin-moodboard-list");
+    return;
+  }
+  const rows = moodboardRows();
+  if (!rows.length) return;
+  const signature = rows.map((row) => row.relative).join("\n");
+  loadMoodboard().then((docs) => {
+    if (!isMoodboardList() || !page.isConnected) return;
+    let grid = page.querySelector(":scope > .dezinin-pockets");
+    if (grid?.dataset.signature === signature && grid.childElementCount === rows.length) return;
+    if (!grid) {
+      grid = document.createElement("div");
+      grid.className = "dezinin-pockets";
+      page.prepend(grid);
+    }
+    const cards = rows.map((row) => pocketCard(row.relative, row.title, docs.get(row.relative)));
+    grid.dataset.signature = signature;
+    grid.replaceChildren(...cards);
+    page.classList.add("dezinin-moodboard-list");
+  });
+}
 function installDezininBrand(cms) {
   if (typeof document === "undefined") return cms;
   const branded = window;
@@ -1130,6 +1370,7 @@ function installDezininBrand(cms) {
     mountMail();
     mountDashboard(editor);
     mountImageActions();
+    mountMoodboardCards();
   };
   paint();
   const observer = new MutationObserver((records) => {
@@ -1152,17 +1393,20 @@ function installDezininBrand(cms) {
       mountMail();
       mountDashboard(editor);
       mountImageActions();
+      mountMoodboardCards();
     }
   });
   observer.observe(document.body, { subtree: true, childList: true, characterData: true });
   document.addEventListener("click", () => window.setTimeout(() => {
     lockSections();
     mountDashboard(editor);
+    mountMoodboardCards();
   }, 0));
   document.addEventListener("click", (event) => keepSingletonBackInEditor(event, editor), true);
   document.addEventListener("click", onMailNavigation, true);
   document.addEventListener("click", keepNavigationOpen, true);
   document.addEventListener("click", onImageActionClick, true);
+  window.addEventListener("click", onPocketClick, true);
   document.addEventListener("keydown", onImageActionKeydown, true);
   repairPreviewHash();
   window.addEventListener("hashchange", (event) => {
@@ -1176,7 +1420,10 @@ function installDezininBrand(cms) {
     mountMailLink();
     mountMail();
     mountDashboard(editor);
+    if (isMoodboardList()) moodboardStale = true;
+    mountMoodboardCards();
   });
+  document.addEventListener("change", () => window.setTimeout(mountMoodboardCards, 60), true);
   window.setTimeout(paint, 50);
   return cms;
 }
