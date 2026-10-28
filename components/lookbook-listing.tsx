@@ -203,13 +203,13 @@ export function LookbookListing({ item }: { item: NewsletterContent }) {
         </div>
       </section>
       {expanded && shown ? (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black p-6 pt-24">
-          <button type="button" aria-label="Close expanded page" onClick={() => setExpanded(false)} className="absolute right-6 top-24 flex h-10 w-10 items-center justify-center rounded-full border border-white/10 text-white">
+        <div className="fixed inset-0 flex items-center justify-center bg-black p-6" style={{ zIndex: 90 }} onClick={() => setExpanded(false)}>
+          <img src={shown} alt={item.title || ""} className="max-h-full max-w-full object-contain" onClick={(event) => event.stopPropagation()} />
+          <button type="button" aria-label="Close expanded page" onClick={() => setExpanded(false)} className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-zinc-900 text-white" style={{ zIndex: 1 }}>
             <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
               <path d="M6 6l12 12M18 6 6 18" />
             </svg>
           </button>
-          <img src={shown} alt={item.title || ""} className="max-h-full max-w-full object-contain" />
         </div>
       ) : null}
     </main>
