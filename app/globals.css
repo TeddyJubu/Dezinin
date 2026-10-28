@@ -63,6 +63,60 @@ body {
   border-color: var(--brand-orange);
 }
 
+.lookbook-visual.is-portrait {
+  flex-direction: row;
+  align-items: stretch;
+  align-self: stretch;
+  justify-content: flex-start;
+  min-height: 0;
+  background: transparent;
+}
+
+.lookbook-visual.is-portrait figure {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+}
+
+.lookbook-visual.is-portrait .lookbook-page {
+  width: auto;
+  height: 100%;
+  max-width: 100%;
+  max-height: none;
+}
+
+.lookbook-visual.is-portrait .lookbook-rail {
+  flex-direction: column;
+  align-self: stretch;
+  justify-content: center;
+  min-height: 0;
+  max-height: none;
+  border-top: 0;
+  border-left: 1px solid var(--border);
+  background: black;
+  padding: 0.75rem 0.5rem;
+}
+
+.lookbook-visual.is-portrait .lookbook-strip {
+  flex-direction: column;
+  overflow-x: hidden;
+  overflow-y: auto;
+  min-height: 0;
+  justify-content: safe center;
+}
+
+.lookbook-visual.is-portrait .lookbook-thumb {
+  width: 4.5rem;
+  height: auto;
+}
+
+.lookbook-visual.is-portrait .lookbook-thumb img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
 .lookbook-copy {
   display: flex;
   min-width: 0;
@@ -71,7 +125,16 @@ body {
 
 @media (min-width: 768px) {
   .lookbook-sheet {
+    height: 80vh;
+    grid-template-rows: minmax(0, 1fr);
     grid-template-columns: minmax(0, 1.35fr) minmax(16rem, 0.85fr);
+  }
+
+  .lookbook-copy {
+    height: 100%;
+    min-height: 0;
+    justify-content: space-between;
+    overflow: auto;
   }
 }
 

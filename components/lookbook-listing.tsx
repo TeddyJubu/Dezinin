@@ -16,10 +16,14 @@ export function LookbookListing({ item }: { item: NewsletterContent }) {
   const pdf = mediaUrl(item.pdf);
   const cover = mediaUrl(item.cover);
   const [pages, setPages] = useState<string[]>([]);
+  const [ratios, setRatios] = useState<number[]>([]);
+  const [coverRatio, setCoverRatio] = useState(1);
   const [total, setTotal] = useState(0);
   const [active, setActive] = useState(0);
   const [expanded, setExpanded] = useState(false);
   const shown = pages[active] || cover;
+  const ratio = ratios[active] || coverRatio;
+  const portrait = ratio < 1;
 
   useEffect(() => {
     if (!pdf) return;
@@ -43,9 +47,15 @@ export function LookbookListing({ item }: { item: NewsletterContent }) {
           await page.render({ canvasContext: context, viewport }).promise;
           if (cancel) return;
           const src = canvas.toDataURL("image/jpeg", 0.84);
+          const pageRatio = viewport.height ? viewport.width / viewport.height : 1;
           setPages((current) => {
             const next = current.slice();
             next[number - 1] = src;
+            return next;
+          });
+          setRatios((current) => {
+            const next = current.slice();
+            next[number - 1] = pageRatio;
             return next;
           });
         }
@@ -78,13 +88,32 @@ export function LookbookListing({ item }: { item: NewsletterContent }) {
   }, [expanded]);
 
   const count = Math.max(total, pages.length);
+  const scrollStrip = (direction: -1 | 1) => {
+    stripRef.current?.scrollBy({
+      left: portrait ? 0 : direction * 160,
+      top: portrait ? direction * 160 : 0,
+      behavior: "smooth",
+    });
+  };
 
   return (
     <main className="min-h-screen bg-background px-4 pb-16 pt-24 md:px-8">
-      <section className="lookbook-sheet mx-auto max-w-6xl">
-        <div className="lookbook-visual">
+      <section className="lookbook-sheet mx-auto">
+        <div className={portrait ? "lookbook-visual is-portrait" : "lookbook-visual"}>
           <figure className="relative">
-            {shown ? <img src={shown} alt={item.title || ""} className="lookbook-page" /> : null}
+            {shown ? (
+              <img
+                src={shown}
+                alt={item.title || ""}
+                className="lookbook-page"
+                onLoad={(event) => {
+                  const image = event.currentTarget;
+                  if (!ratios[active] && image.naturalWidth && image.naturalHeight) {
+                    setCoverRatio(image.naturalWidth / image.naturalHeight);
+                  }
+                }}
+              />
+            ) : null}
             {shown ? (
               <button
                 type="button"
@@ -99,15 +128,15 @@ export function LookbookListing({ item }: { item: NewsletterContent }) {
             ) : null}
           </figure>
           {count > 0 ? (
-            <div className="flex items-center gap-3 border-t border-white/10 px-4 py-3">
+            <div className="lookbook-rail flex items-center gap-3 border-t border-white/10 px-4 py-3">
               <button
                 type="button"
                 aria-label="Previous pages"
-                onClick={() => stripRef.current?.scrollBy({ left: -160, behavior: "smooth" })}
+                onClick={() => scrollStrip(-1)}
                 className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-white/10 text-foreground"
               >
                 <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                  <path d="M15 6 9 12l6 6" />
+                  <path d={portrait ? "m6 15 6-6 6 6" : "M15 6 9 12l6 6"} />
                 </svg>
               </button>
               <div ref={stripRef} className="lookbook-strip">
@@ -119,6 +148,7 @@ export function LookbookListing({ item }: { item: NewsletterContent }) {
                     aria-current={active === index ? "true" : undefined}
                     onClick={() => setActive(index)}
                     className="lookbook-thumb"
+                    style={ratios[index] ? { aspectRatio: String(ratios[index]) } : undefined}
                   >
                     {pages[index] ? <img src={pages[index]} alt="" /> : null}
                   </button>
@@ -127,11 +157,11 @@ export function LookbookListing({ item }: { item: NewsletterContent }) {
               <button
                 type="button"
                 aria-label="Next pages"
-                onClick={() => stripRef.current?.scrollBy({ left: 160, behavior: "smooth" })}
+                onClick={() => scrollStrip(1)}
                 className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-white/10 text-foreground"
               >
                 <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                  <path d="m9 6 6 6-6 6" />
+                  <path d={portrait ? "m6 9 6 6 6-6" : "m9 6 6 6-6 6"} />
                 </svg>
               </button>
             </div>
