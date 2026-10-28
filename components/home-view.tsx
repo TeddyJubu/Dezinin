@@ -8,6 +8,7 @@ import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "re
 import type { Swiper as SwiperInstance } from "swiper";
 import { EffectCoverflow, Navigation } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
+import { a4AspectRatio, layoutJustifiedA4 } from "@/lib/justified-a4";
 import { ContactSection } from "./contact-section";
 import { PlusIcon, mediaUrl, sectionVisible, youtubeIdFrom, type HomeContent, type NewsletterContent, type SiteContent } from "./content";
 
@@ -55,33 +56,30 @@ function NewsletterStage({ headlines, items }: { headlines: HomeContent["headlin
     const grid = { points: [] as { x: number; y: number }[] };
 
     const measure = () => {
-      const columns = mobile ? 2 : 3;
-      const width = window.innerWidth;
-      const gap = (1.2 * width) / 100;
-      const cardWidth = (0.9 * width - (columns + 1) * gap) / columns;
-      const heights = Array(columns).fill(0);
-      const centers = Array.from({ length: columns }, (_, index) => (index - (columns - 1) / 2) * (cardWidth + gap));
-      const points = cards.map((card) => {
+      const fontSize = Number.parseFloat(getComputedStyle(document.documentElement).fontSize);
+      const gap = (Number.isFinite(fontSize) && fontSize > 0 ? fontSize : 16) * 0.75;
+      const inner = Math.max(gap, root.clientWidth - gap * 2);
+      const aspects = cards.map((card) => {
         const image = card.querySelector("img");
-        const ratio = image && image.naturalWidth > 0 ? image.naturalHeight / image.naturalWidth : 1.25;
-        const cardHeight = cardWidth * ratio;
-        card.style.width = `${cardWidth}px`;
-        card.style.height = `${cardHeight}px`;
-        const column = heights.indexOf(Math.min(...heights));
-        const point = { x: centers[column], y: heights[column] + cardHeight / 2 };
-        heights[column] += cardHeight + gap;
-        return point;
+        if (image instanceof HTMLImageElement && image.naturalWidth > 0) return a4AspectRatio(image.naturalWidth, image.naturalHeight);
+        return a4AspectRatio(210, 297);
       });
-      const total = Math.max(...heights);
-      const view = window.innerHeight;
-      points.forEach((point) => {
-        point.y -= total / 2;
-        point.y += view / 2;
-        point.y += -80;
+      const layout = layoutJustifiedA4(aspects, inner, { gap });
+      layout.items.forEach((item) => {
+        const card = cards[item.index];
+        if (!card) return;
+        card.style.width = `${item.width}px`;
+        card.style.height = `${item.height}px`;
       });
-      grid.points = points;
+      grid.points = layout.items.map((item) => ({
+        x: item.x + item.width / 2 - layout.width / 2,
+        y: item.y + item.height / 2 - layout.height / 2,
+      }));
     };
 
+    let frame = 0;
+    let disposed = false;
+    let observer: ResizeObserver | undefined;
     let removeMove = () => {};
     const ctx = gsap.context(() => {
       gsap.set(cards, {
@@ -145,6 +143,7 @@ function NewsletterStage({ headlines, items }: { headlines: HomeContent["headlin
         .map((card) => card.querySelector("img"))
         .filter((image): image is HTMLImageElement => image instanceof HTMLImageElement && !image.complete);
       const settle = () => {
+        if (disposed) return;
         const y = window.scrollY;
         measure();
         ScrollTrigger.refresh();
@@ -154,6 +153,17 @@ function NewsletterStage({ headlines, items }: { headlines: HomeContent["headlin
         image.addEventListener("load", settle, { once: true });
         image.addEventListener("error", settle, { once: true });
       });
+
+      let lastWidth = root.clientWidth;
+      const onResize = (entries: ResizeObserverEntry[]) => {
+        const next = entries[0]?.contentRect.width ?? root.clientWidth;
+        if (Math.abs(next - lastWidth) < 1) return;
+        lastWidth = next;
+        cancelAnimationFrame(frame);
+        frame = requestAnimationFrame(settle);
+      };
+      observer = new ResizeObserver(onResize);
+      observer.observe(root);
 
       timeline.to(".hero-text-line-3", { opacity: 0, scale: 0.5, filter: "blur(20px)", duration: 2, ease: "power2.inOut" }, 9.4);
       timeline.to(cards, { x: 0, y: 0, scale: 0.3, opacity: 0, rotation: 0, ease: "none", duration: 0.7 }, 9.2);
@@ -177,6 +187,9 @@ function NewsletterStage({ headlines, items }: { headlines: HomeContent["headlin
     }, root);
 
     return () => {
+      disposed = true;
+      cancelAnimationFrame(frame);
+      observer?.disconnect();
       removeMove();
       ctx.revert();
       ScrollTrigger.clearScrollMemory?.("manual");
@@ -217,7 +230,7 @@ function NewsletterStage({ headlines, items }: { headlines: HomeContent["headlin
                     pointerEvents: "none",
                   }}
                 >
-                  <img src={mediaUrl(item.cover)} alt={item.title || ""} className="w-full h-full object-cover opacity-100" loading="eager" />
+                  <img src={mediaUrl(item.cover)} alt={item.title || ""} className="h-full w-full object-contain" decoding="async" loading="eager" />
                   <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-orange-400 to-transparent p-4 flex items-end opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out">
                     <h3 className="text-white text-lg font-bold leading-tight drop-shadow-md">{item.title}</h3>
                   </div>
