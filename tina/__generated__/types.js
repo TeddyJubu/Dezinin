@@ -59,6 +59,13 @@ export const HomePartsFragmentDoc = gql`
   showHero
   lockHero
   heroVideo
+  showLookbook
+  lockLookbook
+  headlines {
+    __typename
+    title
+    subtitle
+  }
   showPartners
   lockPartners
   experienceTitle
@@ -107,6 +114,16 @@ export const HomePartsFragmentDoc = gql`
     phonePlaceholder
     messagePlaceholder
   }
+}
+    `;
+export const NewsletterPartsFragmentDoc = gql`
+    fragment NewsletterParts on Newsletter {
+  __typename
+  title
+  order
+  cover
+  pdf
+  summary
 }
     `;
 export const PagePartsFragmentDoc = gql`
@@ -293,6 +310,63 @@ export const HomeConnectionDocument = gql`
   }
 }
     ${HomePartsFragmentDoc}`;
+export const NewsletterDocument = gql`
+    query newsletter($relativePath: String!) {
+  newsletter(relativePath: $relativePath) {
+    ... on Document {
+      _sys {
+        filename
+        basename
+        hasReferences
+        breadcrumbs
+        path
+        relativePath
+        extension
+      }
+      id
+    }
+    ...NewsletterParts
+  }
+}
+    ${NewsletterPartsFragmentDoc}`;
+export const NewsletterConnectionDocument = gql`
+    query newsletterConnection($before: String, $after: String, $first: Float, $last: Float, $sort: String, $filter: NewsletterFilter) {
+  newsletterConnection(
+    before: $before
+    after: $after
+    first: $first
+    last: $last
+    sort: $sort
+    filter: $filter
+  ) {
+    pageInfo {
+      hasPreviousPage
+      hasNextPage
+      startCursor
+      endCursor
+    }
+    totalCount
+    edges {
+      cursor
+      node {
+        ... on Document {
+          _sys {
+            filename
+            basename
+            hasReferences
+            breadcrumbs
+            path
+            relativePath
+            extension
+          }
+          id
+        }
+        ...NewsletterParts
+      }
+    }
+  }
+}
+    ${NewsletterPartsFragmentDoc}`;
 export const PageDocument = gql`
     query page($relativePath: String!) {
   page(relativePath: $relativePath) {
@@ -369,6 +443,12 @@ export function getSdk(requester) {
     },
     homeConnection(variables, options) {
       return requester(HomeConnectionDocument, variables, options);
+    },
+    newsletter(variables, options) {
+      return requester(NewsletterDocument, variables, options);
+    },
+    newsletterConnection(variables, options) {
+      return requester(NewsletterConnectionDocument, variables, options);
     },
     page(variables, options) {
       return requester(PageDocument, variables, options);

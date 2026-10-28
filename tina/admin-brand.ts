@@ -956,8 +956,9 @@ function keepSingletonBackInEditor(event: Event, cms: EditorCms) {
   if (!(target instanceof Element)) return;
   const button = target.closest("button[aria-label^='Back to']");
   if (!button || !documentHash().startsWith("#/collections/")) return;
-  // A page document returns to the pages list through Tina's own handler.
+  // A page or newsletter document returns to its list through Tina's own handler.
   if (documentHash().startsWith("#/collections/edit/page")) return;
+  if (documentHash().startsWith("#/collections/edit/newsletter")) return;
   // Nested items such as an FAQ question keep the document hash and live in form state.
   event.preventDefault();
   event.stopPropagation();

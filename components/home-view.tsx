@@ -1,11 +1,236 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import type { Swiper as SwiperInstance } from "swiper";
 import { EffectCoverflow, Navigation } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { ContactSection } from "./contact-section";
-import { PlusIcon, mediaUrl, sectionVisible, youtubeIdFrom, type HomeContent, type SiteContent } from "./content";
+import { PlusIcon, mediaUrl, sectionVisible, youtubeIdFrom, type HomeContent, type NewsletterContent, type SiteContent } from "./content";
+
+const headlineClass = [
+  "hero-text text-center z-20 pointer-events-none px-4",
+  "hero-text-line-2 text-center z-20 pointer-events-none absolute opacity-0 px-4",
+  "hero-text-line-3 text-center z-20 pointer-events-none absolute opacity-0 px-4",
+];
+
+const fallbackHeadlines = [
+  { title: "NEWSLETTER", subtitle: "check out the trend" },
+  { title: "MOODBOARD", subtitle: "of the season" },
+  { title: "FORECAST", subtitle: "of the trend" },
+];
+
+function scatter(index: number, mobile: boolean) {
+  const ring = Math.floor(index / 4);
+  const reach = mobile ? 280 : 600;
+  const lift = mobile ? 180 : 400;
+  const slot = index % 4;
+  const x = (slot === 0 || slot === 3 ? reach : -reach) + 8 * ring;
+  const y = (slot < 2 ? -lift : lift) + 3 * ring;
+  const rotation = [37, -53, -125, 155][slot] + 2 * ring;
+  return { x, y, rotation, zIndex: ring };
+}
+
+function NewsletterStage({ headlines, items }: { headlines: HomeContent["headlines"]; items: NewsletterContent[] }) {
+  const router = useRouter();
+  const rootRef = useRef<HTMLElement>(null);
+  const cloudRef = useRef<HTMLDivElement>(null);
+  const cardRefs = useRef<Array<HTMLAnchorElement | null>>([]);
+  const signature = items.map((item) => item._sys?.filename || item.title || "").join("\n");
+  const lines = (headlines || []).filter((line) => line?.title).slice(0, 3);
+  const shownLines = lines.length ? lines : fallbackHeadlines;
+
+  useLayoutEffect(() => {
+    const root = rootRef.current;
+    const cloud = cloudRef.current;
+    if (!root || !cloud) return;
+    const cards = cardRefs.current.filter((card): card is HTMLAnchorElement => Boolean(card));
+    if (!cards.length) return;
+
+    gsap.registerPlugin(ScrollTrigger);
+    const mobile = window.innerWidth < 768;
+    const grid = { points: [] as { x: number; y: number }[] };
+
+    const measure = () => {
+      const columns = mobile ? 2 : 3;
+      const width = window.innerWidth;
+      const gap = (1.2 * width) / 100;
+      const cardWidth = (0.9 * width - (columns + 1) * gap) / columns;
+      const heights = Array(columns).fill(0);
+      const centers = Array.from({ length: columns }, (_, index) => (index - (columns - 1) / 2) * (cardWidth + gap));
+      const points = cards.map((card) => {
+        const image = card.querySelector("img");
+        const ratio = image && image.naturalWidth > 0 ? image.naturalHeight / image.naturalWidth : 1.25;
+        const cardHeight = cardWidth * ratio;
+        card.style.width = `${cardWidth}px`;
+        card.style.height = `${cardHeight}px`;
+        const column = heights.indexOf(Math.min(...heights));
+        const point = { x: centers[column], y: heights[column] + cardHeight / 2 };
+        heights[column] += cardHeight + gap;
+        return point;
+      });
+      const total = Math.max(...heights);
+      const view = window.innerHeight;
+      points.forEach((point) => {
+        point.y -= total / 2;
+        point.y += view / 2;
+        point.y += -80;
+      });
+      grid.points = points;
+    };
+
+    let removeMove = () => {};
+    const ctx = gsap.context(() => {
+      gsap.set(cards, {
+        x: (index) => scatter(index, mobile).x,
+        y: (index) => scatter(index, mobile).y,
+        opacity: 1,
+        scale: 1,
+        rotation: (index) => scatter(index, mobile).rotation,
+        zIndex: (index) => scatter(index, mobile).zIndex,
+      });
+
+      const moveX = gsap.quickTo(cloud, "x", { duration: 1.5, ease: "power2.out" });
+      const moveY = gsap.quickTo(cloud, "y", { duration: 1.5, ease: "power2.out" });
+      const onMove = (event: MouseEvent) => {
+        if (mobile) return;
+        moveX((event.clientX / window.innerWidth - 0.5) * 80);
+        moveY((event.clientY / window.innerHeight - 0.5) * 80);
+      };
+      window.addEventListener("mousemove", onMove, { passive: true });
+      removeMove = () => window.removeEventListener("mousemove", onMove);
+
+      const timeline = gsap.timeline({
+        scrollTrigger: {
+          trigger: root,
+          start: "top top",
+          end: "+=380%",
+          scrub: 0.5,
+          pin: true,
+          invalidateOnRefresh: true,
+          anticipatePin: mobile ? 0 : 1,
+        },
+      });
+
+      timeline.to(
+        cards,
+        {
+          duration: 9.1,
+          x: (index) => {
+            const reach = 1 - index / cards.length;
+            return 600 * reach * Math.cos((Math.PI / 180) * ((index % 4) * 90 + 360 * reach * 3));
+          },
+          y: (index) => {
+            const reach = 1 - index / cards.length;
+            return 600 * reach * Math.sin((Math.PI / 180) * ((index % 4) * 90 + 360 * reach * 3));
+          },
+          scale: 0,
+          opacity: 0,
+          rotation: 0,
+          ease: "power2.in",
+          stagger: { each: 0.02, from: "start" },
+        },
+        0,
+      );
+      timeline.to(".hero-text", { opacity: 0, scale: 0.5, filter: "blur(20px)", duration: 2, ease: "power2.inOut" }, 1);
+      timeline.to(".hero-text-line-2", { opacity: 1, scale: 1, filter: "blur(0px)", duration: 2, ease: "power2.inOut" }, 3.7);
+      timeline.to(".hero-text-line-2", { opacity: 0, scale: 0.5, filter: "blur(20px)", duration: 2, ease: "power2.inOut" }, 5.7);
+      timeline.to(".hero-text-line-3", { opacity: 1, scale: 1, filter: "blur(0px)", duration: 2, ease: "power2.inOut" }, 7.4);
+
+      measure();
+      const pending = cards
+        .map((card) => card.querySelector("img"))
+        .filter((image): image is HTMLImageElement => image instanceof HTMLImageElement && !image.complete);
+      const settle = () => {
+        const y = window.scrollY;
+        measure();
+        ScrollTrigger.refresh();
+        if (Math.abs(window.scrollY - y) > 1) window.scrollTo(0, y);
+      };
+      pending.forEach((image) => {
+        image.addEventListener("load", settle, { once: true });
+        image.addEventListener("error", settle, { once: true });
+      });
+
+      timeline.to(".hero-text-line-3", { opacity: 0, scale: 0.5, filter: "blur(20px)", duration: 2, ease: "power2.inOut" }, 9.4);
+      timeline.to(cards, { x: 0, y: 0, scale: 0.3, opacity: 0, rotation: 0, ease: "none", duration: 0.7 }, 9.2);
+      timeline.eventCallback("onUpdate", () => {
+        const clickable = timeline.progress() > 0.9;
+        cards.forEach((card) => {
+          card.style.pointerEvents = clickable ? "auto" : "none";
+        });
+      });
+      timeline.to(cards, {
+        x: (index) => grid.points[index]?.x ?? 0,
+        y: (index) => grid.points[index]?.y ?? 0,
+        scale: 1,
+        opacity: 1,
+        rotation: 0,
+        filter: "blur(0px)",
+        ease: "power3.out",
+        duration: 2.5,
+        stagger: { each: 0.08, from: "start" },
+      });
+    }, root);
+
+    return () => {
+      removeMove();
+      ctx.revert();
+      ScrollTrigger.clearScrollMemory?.("manual");
+    };
+  }, [signature]);
+
+  return (
+    <section id="newsletter-section">
+      <div ref={rootRef} className="relative bg-background overflow-hidden">
+        <div className="h-screen w-full flex items-center justify-center relative">
+          {shownLines.map((line, index) => (
+            <div key={line.title} className={headlineClass[index]}>
+              <h1 className="text-5xl sm:text-7xl md:text-9xl font-bold text-foreground tracking-wide">{line.title}</h1>
+              <p className="text-zinc-500 mt-2 md:mt-4 text-sm md:text-lg font-light tracking-[0.2em] uppercase">{line.subtitle}</p>
+            </div>
+          ))}
+          <div ref={cloudRef} className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            {items.map((item, index) => {
+              const place = scatter(index, false);
+              return (
+                <Link
+                  key={item._sys?.filename || item.title}
+                  href={`/newsletters/${item._sys?.filename || ""}`}
+                  prefetch={false}
+                  scroll
+                  onMouseEnter={() => {
+                    const href = `/newsletters/${item._sys?.filename || ""}`;
+                    if (!href.endsWith("/")) router.prefetch(href);
+                  }}
+                  ref={(node) => {
+                    cardRefs.current[index] = node;
+                  }}
+                  className="group absolute w-32 sm:w-52 md:w-72 lg:w-96 overflow-hidden bg-zinc-900 will-change-transform cursor-pointer"
+                  style={{
+                    transform: `translate(${place.x}px, ${place.y}px) rotate(${place.rotation}deg)`,
+                    zIndex: place.zIndex,
+                    backfaceVisibility: "hidden",
+                    pointerEvents: "none",
+                  }}
+                >
+                  <img src={mediaUrl(item.cover)} alt={item.title || ""} className="w-full h-full object-cover opacity-100" loading="eager" />
+                  <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-orange-400 to-transparent p-4 flex items-end opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out">
+                    <h3 className="text-white text-lg font-bold leading-tight drop-shadow-md">{item.title}</h3>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+        <div className="h-[45vh] md:h-[75vh]" />
+      </div>
+    </section>
+  );
+}
 
 function RevealRow({ children }: { children: ReactNode }) {
   const { ref, shown } = useReveal();
@@ -147,9 +372,11 @@ function useReveal() {
 export function HomeView({
   home,
   site,
+  newsletters,
 }: {
   home: HomeContent;
   site: SiteContent;
+  newsletters: NewsletterContent[];
 }) {
   const filters = (home.filters || []).filter(Boolean) as string[];
   const [filter, setFilter] = useState(filters[0] || "ALL");
@@ -173,6 +400,10 @@ export function HomeView({
           </div>
         </div>
       </section>}
+
+      {sectionVisible(home.showLookbook) && newsletters.length > 0 && (
+        <NewsletterStage headlines={home.headlines} items={newsletters} />
+      )}
 
       {sectionVisible(home.showPartners) && <section id="partner-slider" className="bg-brand-black py-2 md:py-6 my-8 md:my-28">
         <div className="mx-auto max-w-6xl px-4">

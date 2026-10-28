@@ -30,6 +30,13 @@ const branch =
 
 const isLocal = process.env.TINA_PUBLIC_IS_LOCAL === "true";
 
+const slugify = (value: string) =>
+  value
+    .toLowerCase()
+    .replace(/['’]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+
 export default defineConfig({
   branch,
   contentApiUrlOverride: "/api/tina/gql",
@@ -131,6 +138,18 @@ export default defineConfig({
         fields: [
           ...sectionToggle("showHero", "Hero"),
           { type: "image", name: "heroVideo", label: "Hero video" },
+          ...sectionToggle("showLookbook", "Lookbook"),
+          {
+            type: "object",
+            name: "headlines",
+            label: "Moodboard headlines",
+            list: true,
+            ui: { itemProps: (item) => ({ label: item?.title }) },
+            fields: [
+              { type: "string", name: "title", label: "Title", required: true },
+              { type: "string", name: "subtitle", label: "Subtitle" },
+            ],
+          },
           ...sectionToggle("showPartners", "Partners"),
           { type: "string", name: "experienceTitle", label: "Experience heading" },
           { type: "image", name: "partners", label: "Partner logos", list: true },
@@ -208,6 +227,25 @@ export default defineConfig({
               { type: "string", name: "messagePlaceholder", label: "Message placeholder" },
             ],
           },
+        ],
+      },
+      {
+        name: "newsletter",
+        label: "Moodboard",
+        path: "content/newsletters",
+        format: "json",
+        ui: {
+          router: ({ document }) => `/newsletters/${document._sys.filename}`,
+          filename: {
+            slugify: (values) => slugify(values?.title || "newsletter"),
+          },
+        },
+        fields: [
+          { type: "string", name: "title", label: "Title", isTitle: true, required: true },
+          { type: "number", name: "order", label: "Order" },
+          { type: "image", name: "cover", label: "Cover" },
+          { type: "image", name: "pdf", label: "PDF" },
+          { type: "string", name: "summary", label: "Summary", ui: { component: "textarea" } },
         ],
       },
       {

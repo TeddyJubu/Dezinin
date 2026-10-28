@@ -921,6 +921,7 @@ function keepSingletonBackInEditor(event, cms) {
   const button = target.closest("button[aria-label^='Back to']");
   if (!button || !documentHash().startsWith("#/collections/")) return;
   if (documentHash().startsWith("#/collections/edit/page")) return;
+  if (documentHash().startsWith("#/collections/edit/newsletter")) return;
   event.preventDefault();
   event.stopPropagation();
   if (isHash(DASHBOARD) || isHash(MAIN_PAGE)) {
@@ -1299,6 +1300,7 @@ var sectionToggle = (name, label) => [
 ];
 var branch = process.env.NEXT_PUBLIC_TINA_BRANCH || process.env.GITHUB_BRANCH || process.env.VERCEL_GIT_COMMIT_REF || process.env.HEAD || "main";
 var isLocal = process.env.TINA_PUBLIC_IS_LOCAL === "true";
+var slugify = (value) => value.toLowerCase().replace(/['’]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 var config_default = defineConfig({
   branch,
   contentApiUrlOverride: "/api/tina/gql",
@@ -1398,6 +1400,18 @@ var config_default = defineConfig({
         fields: [
           ...sectionToggle("showHero", "Hero"),
           { type: "image", name: "heroVideo", label: "Hero video" },
+          ...sectionToggle("showLookbook", "Lookbook"),
+          {
+            type: "object",
+            name: "headlines",
+            label: "Moodboard headlines",
+            list: true,
+            ui: { itemProps: (item) => ({ label: item?.title }) },
+            fields: [
+              { type: "string", name: "title", label: "Title", required: true },
+              { type: "string", name: "subtitle", label: "Subtitle" }
+            ]
+          },
           ...sectionToggle("showPartners", "Partners"),
           { type: "string", name: "experienceTitle", label: "Experience heading" },
           { type: "image", name: "partners", label: "Partner logos", list: true },
@@ -1475,6 +1489,25 @@ var config_default = defineConfig({
               { type: "string", name: "messagePlaceholder", label: "Message placeholder" }
             ]
           }
+        ]
+      },
+      {
+        name: "newsletter",
+        label: "Moodboard",
+        path: "content/newsletters",
+        format: "json",
+        ui: {
+          router: ({ document: document2 }) => `/newsletters/${document2._sys.filename}`,
+          filename: {
+            slugify: (values) => slugify(values?.title || "newsletter")
+          }
+        },
+        fields: [
+          { type: "string", name: "title", label: "Title", isTitle: true, required: true },
+          { type: "number", name: "order", label: "Order" },
+          { type: "image", name: "cover", label: "Cover" },
+          { type: "image", name: "pdf", label: "PDF" },
+          { type: "string", name: "summary", label: "Summary", ui: { component: "textarea" } }
         ]
       },
       {

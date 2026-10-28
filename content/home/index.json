@@ -2,7 +2,7 @@
   "showHero": true,
   "lockHero": false,
   "heroVideo": "/video/hypetown_hero.mp4",
-  "showLookbook": false,
+  "showLookbook": true,
   "lockLookbook": false,
   "headlines": [
     {

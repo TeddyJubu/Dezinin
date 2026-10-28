@@ -5,7 +5,7 @@
     "node": "22.x"
   },
   "scripts": {
-    "dev": "tinacms dev -c \"next dev --port 3000\"",
+    "dev": "TINA_PUBLIC_IS_LOCAL=true tinacms dev -c \"next dev --port 3000\"",
     "build": "tinacms build && node scripts/brand-admin.mjs && node scripts/media-manifest.mjs && next build",
     "start": "next start"
   },

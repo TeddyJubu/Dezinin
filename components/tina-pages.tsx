@@ -13,14 +13,22 @@ function primaryForm(query: TinaQuery) {
   return { ...query, experimental___selectFormByFormId: () => id };
 }
 
-export function HomeClient({ home, site }: { home: TinaQuery; site: TinaQuery }) {
+export function HomeClient({
+  home,
+  site,
+  newsletters,
+}: {
+  home: TinaQuery;
+  site: TinaQuery;
+  newsletters: NewsletterContent[];
+}) {
   const siteResult = useTina(site);
   const homeResult = useTina(primaryForm(home));
   const siteData = siteResult.data.site as SiteContent;
   return (
     <Shell>
       <Header site={siteData} />
-      <HomeView home={homeResult.data.home as HomeContent} site={siteData} />
+      <HomeView home={homeResult.data.home as HomeContent} site={siteData} newsletters={newsletters} />
       <Footer site={siteData} />
       <ThemeToggle />
     </Shell>
