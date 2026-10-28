@@ -154,7 +154,7 @@ export default defineConfig({
           { type: "string", name: "experienceTitle", label: "Experience heading" },
           { type: "image", name: "partners", label: "Partner logos", list: true },
           ...sectionToggle("showProjects", "Projects"),
-          { type: "string", name: "filters", label: "Project filters", list: true },
+          { type: "string", name: "filters", label: "Categories", list: true },
           {
             type: "object",
             name: "projects",
