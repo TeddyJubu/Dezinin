@@ -182,6 +182,40 @@ function rebalanceTail(aspects: number[], breaks: number[], width: number, gap: 
  * Order-preserving justified rows. Every row, including the last, is scaled
  * to `width`. Images keep the aspect ratios they were given.
  */
+function blockHeight(layout: JustifiedLayout, rowCount = layout.rows.length) {
+  if (rowCount <= 0 || layout.rows.length === 0) return 0;
+  const row = layout.rows[Math.min(rowCount, layout.rows.length) - 1];
+  return row.top + row.height;
+}
+
+/**
+ * Largest justified layout whose first `maxRows` rows fit in `available` height.
+ * Prefers a page of 5 or 6 rows when that page fits.
+ */
+export function layoutWithin(aspects: number[], width: number, available: number, maxRows: number, gap = DEFAULT_GAP): JustifiedLayout {
+  const natural = layoutJustifiedA4(aspects, width, { gap });
+  if (available <= 0) return natural;
+  const targets = [natural.targetRowHeight];
+  const steps = 16;
+  for (let step = 0; step <= steps; step++) targets.push(48 + ((Math.max(available, natural.targetRowHeight) - 48) * step) / steps);
+
+  let best = natural;
+  let bestScore = Number.NEGATIVE_INFINITY;
+  for (const targetRowHeight of targets) {
+    const trial = layoutJustifiedA4(aspects, width, { gap, targetRowHeight });
+    const count = Math.min(maxRows, trial.rows.length);
+    const height = blockHeight(trial, count);
+    if (count === 0 || height > available) continue;
+    const band = count >= Math.min(5, maxRows) && count <= maxRows ? 2 : 1;
+    const score = band * 1_000_000 + count * 10_000 + height;
+    if (score > bestScore) {
+      best = trial;
+      bestScore = score;
+    }
+  }
+  return best;
+}
+
 export function layoutJustifiedA4(aspectsIn: number[], containerWidth: number, options: JustifiedOptions = {}): JustifiedLayout {
   const aspects = aspectsIn.map(sanitize);
   const gap = options.gap ?? DEFAULT_GAP;

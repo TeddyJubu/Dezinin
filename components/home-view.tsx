@@ -8,7 +8,7 @@ import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "re
 import type { Swiper as SwiperInstance } from "swiper";
 import { EffectCoverflow, Navigation } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { a4AspectRatio, layoutJustifiedA4 } from "@/lib/justified-a4";
+import { a4AspectRatio, layoutJustifiedA4, layoutWithin } from "@/lib/justified-a4";
 import { ContactSection } from "./contact-section";
 import { PlusIcon, mediaUrl, sectionVisible, youtubeIdFrom, type HomeContent, type NewsletterContent, type SiteContent } from "./content";
 
@@ -35,11 +35,16 @@ function scatter(index: number, mobile: boolean) {
   return { x, y, rotation, zIndex: ring };
 }
 
+const rowsPerPage = 6;
+
 function NewsletterStage({ headlines, items }: { headlines: HomeContent["headlines"]; items: NewsletterContent[] }) {
   const router = useRouter();
   const rootRef = useRef<HTMLDivElement>(null);
   const cloudRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
   const cardRefs = useRef<Array<HTMLAnchorElement | null>>([]);
+  const pagesRef = useRef(1);
+  const measureRef = useRef<() => void>(() => {});
   const signature = items.map((item) => item._sys?.filename || item.title || "").join("\n");
   const lines = (headlines || []).filter((line) => line?.title).slice(0, 3);
   const shownLines = lines.length ? lines : fallbackHeadlines;
@@ -53,29 +58,79 @@ function NewsletterStage({ headlines, items }: { headlines: HomeContent["headlin
 
     gsap.registerPlugin(ScrollTrigger);
     const mobile = window.innerWidth < 768;
-    const grid = { points: [] as { x: number; y: number }[] };
+    const grid = {
+      points: [] as { x: number; y: number }[],
+      onStage: [] as boolean[],
+      hasMore: false,
+    };
+    let openProgress = () => 0;
+    let fittedTarget = 0;
+    let fittedWidth = 0;
 
     const measure = () => {
       const fontSize = Number.parseFloat(getComputedStyle(document.documentElement).fontSize);
       const gap = (Number.isFinite(fontSize) && fontSize > 0 ? fontSize : 16) * 0.75;
       const inner = Math.max(gap, root.clientWidth - gap * 2);
+      const view = cloud.clientHeight || window.innerHeight;
       const aspects = cards.map((card) => {
         const image = card.querySelector("img");
         if (image instanceof HTMLImageElement && image.naturalWidth > 0) return a4AspectRatio(image.naturalWidth, image.naturalHeight);
         return a4AspectRatio(210, 297);
       });
-      const layout = layoutJustifiedA4(aspects, inner, { gap });
+      const button = buttonRef.current;
+      const buttonHeight = Math.max(button?.offsetHeight || 0, gap * 3);
+      if (Math.abs(inner - fittedWidth) > 1) {
+        fittedWidth = inner;
+        fittedTarget = 0;
+      }
+      const room = Math.max(gap * 8, view - buttonHeight - gap);
+      if (!fittedTarget) fittedTarget = layoutWithin(aspects, inner, room, rowsPerPage, gap).targetRowHeight;
+      const layout = layoutJustifiedA4(aspects, inner, { gap, targetRowHeight: fittedTarget });
+      const limit = pagesRef.current * rowsPerPage;
+      const shownRows = Math.min(layout.rows.length, limit);
+      const onStage = aspects.map(() => false);
+      layout.rows.slice(0, shownRows).forEach((row) => {
+        row.items.forEach((item) => {
+          onStage[item.index] = true;
+        });
+      });
+      const block = shownRows ? layout.rows[shownRows - 1].top + layout.rows[shownRows - 1].height : 0;
+      const hasMore = shownRows < layout.rows.length;
+      const stageHeight = Math.max(view, block + gap + (hasMore ? buttonHeight + gap : gap));
+      root.style.height = `${stageHeight}px`;
+      root.style.overflow = "visible";
       layout.items.forEach((item) => {
         const card = cards[item.index];
         if (!card) return;
         card.style.width = `${item.width}px`;
         card.style.height = `${item.height}px`;
       });
+      grid.onStage = onStage;
+      grid.hasMore = hasMore;
       grid.points = layout.items.map((item) => ({
-        x: item.x + item.width / 2 - layout.width / 2,
-        y: item.y + item.height / 2 - layout.height / 2,
+        x: item.x + item.width / 2 - inner / 2,
+        y: onStage[item.index] ? item.y + item.height / 2 - view / 2 : 0,
       }));
+      if (button) {
+        button.setAttribute("aria-hidden", hasMore ? "false" : "true");
+        const underGrid = block + gap;
+        const atBottom = Math.max(gap, view - buttonHeight - gap);
+        button.style.top = `${pagesRef.current > 1 ? underGrid : Math.max(underGrid, atBottom)}px`;
+      }
+      if (openProgress() > 0.85) {
+        cards.forEach((card, index) => {
+          gsap.set(card, {
+            x: grid.points[index]?.x ?? 0,
+            y: grid.points[index]?.y ?? 0,
+            opacity: grid.onStage[index] ? 1 : 0,
+            scale: 1,
+            rotation: 0,
+            overwrite: "auto",
+          });
+        });
+      }
     };
+    measureRef.current = measure;
 
     let frame = 0;
     let disposed = false;
@@ -105,13 +160,14 @@ function NewsletterStage({ headlines, items }: { headlines: HomeContent["headlin
         scrollTrigger: {
           trigger: root,
           start: "top top",
-          end: "+=380%",
+          end: () => `+=${Math.round(window.innerHeight * 3.8)}`,
           scrub: 0.5,
           pin: true,
           invalidateOnRefresh: true,
           anticipatePin: mobile ? 0 : 1,
         },
       });
+      openProgress = () => timeline.progress();
 
       timeline.to(
         cards,
@@ -168,16 +224,23 @@ function NewsletterStage({ headlines, items }: { headlines: HomeContent["headlin
       timeline.to(".hero-text-line-3", { opacity: 0, scale: 0.5, filter: "blur(20px)", duration: 2, ease: "power2.inOut" }, 9.4);
       timeline.to(cards, { x: 0, y: 0, scale: 0.3, opacity: 0, rotation: 0, ease: "none", duration: 0.7 }, 9.2);
       timeline.eventCallback("onUpdate", () => {
-        const clickable = timeline.progress() > 0.9;
-        cards.forEach((card) => {
-          card.style.pointerEvents = clickable ? "auto" : "none";
+        const open = timeline.progress() > 0.9;
+        const button = buttonRef.current;
+        cards.forEach((card, index) => {
+          card.style.pointerEvents = open && grid.onStage[index] ? "auto" : "none";
         });
+        if (button) {
+          const show = open && grid.hasMore;
+          button.style.opacity = show ? "1" : "0";
+          button.style.pointerEvents = show ? "auto" : "none";
+          button.tabIndex = show ? 0 : -1;
+        }
       });
       timeline.to(cards, {
         x: (index) => grid.points[index]?.x ?? 0,
         y: (index) => grid.points[index]?.y ?? 0,
         scale: 1,
-        opacity: 1,
+        opacity: (index) => (grid.onStage[index] ? 1 : 0),
         rotation: 0,
         filter: "blur(0px)",
         ease: "power3.out",
@@ -198,15 +261,15 @@ function NewsletterStage({ headlines, items }: { headlines: HomeContent["headlin
 
   return (
     <section id="newsletter-section">
-      <div ref={rootRef} className="relative bg-background overflow-hidden">
-        <div className="h-screen w-full flex items-center justify-center relative">
+      <div ref={rootRef} className="relative bg-background" style={{ minHeight: "100vh" }}>
+        <div className="relative flex h-screen w-full items-center justify-center">
           {shownLines.map((line, index) => (
             <div key={line.title} className={headlineClass[index]}>
               <h1 className="text-5xl sm:text-7xl md:text-9xl font-bold text-foreground tracking-wide">{line.title}</h1>
               <p className="text-zinc-500 mt-2 md:mt-4 text-sm md:text-lg font-light tracking-[0.2em] uppercase">{line.subtitle}</p>
             </div>
           ))}
-          <div ref={cloudRef} className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div ref={cloudRef} className="pointer-events-none absolute inset-x-0 top-0 flex h-screen items-center justify-center overflow-visible">
             {items.map((item, index) => {
               const place = scatter(index, false);
               return (
@@ -239,7 +302,19 @@ function NewsletterStage({ headlines, items }: { headlines: HomeContent["headlin
             })}
           </div>
         </div>
-        <div className="h-[45vh] md:h-[75vh]" />
+        <button
+          ref={buttonRef}
+          type="button"
+          onClick={() => {
+            pagesRef.current += 1;
+            measureRef.current();
+            ScrollTrigger.refresh();
+          }}
+          className="absolute left-1/2 z-30 -translate-x-1/2 border border-brand-orange px-6 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-brand-orange transition-opacity duration-300 hover:bg-brand-orange/10"
+          style={{ opacity: 0, pointerEvents: "none" }}
+        >
+          Load more
+        </button>
       </div>
     </section>
   );
