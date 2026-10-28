@@ -50,22 +50,9 @@ export function a4AspectRatio(width: number, height: number): number {
 
 /** Portrait-widths that fit a row comfortably at this container width. */
 export function portraitsForWidth(width: number): number {
-  const stops: Array<[number, number]> = [
-    [320, 2],
-    [768, 3.5],
-    [1024, 4.25],
-    [1280, 5],
-    [1600, 6],
-  ];
-  if (width <= stops[0][0]) return stops[0][1];
-  const last = stops[stops.length - 1];
-  if (width >= last[0]) return last[1];
-  for (let i = 1; i < stops.length; i++) {
-    const [w0, p0] = stops[i - 1];
-    const [w1, p1] = stops[i];
-    if (width <= w1) return p0 + ((p1 - p0) * (width - w0)) / (w1 - w0);
-  }
-  return last[1];
+  if (width < 640) return 2;
+  if (width < 1200) return 3;
+  return 4;
 }
 
 function sanitize(aspect: number): number {
@@ -182,40 +169,6 @@ function rebalanceTail(aspects: number[], breaks: number[], width: number, gap: 
  * Order-preserving justified rows. Every row, including the last, is scaled
  * to `width`. Images keep the aspect ratios they were given.
  */
-function blockHeight(layout: JustifiedLayout, rowCount = layout.rows.length) {
-  if (rowCount <= 0 || layout.rows.length === 0) return 0;
-  const row = layout.rows[Math.min(rowCount, layout.rows.length) - 1];
-  return row.top + row.height;
-}
-
-/**
- * Largest justified layout whose first `maxRows` rows fit in `available` height.
- * Prefers a page of 5 or 6 rows when that page fits.
- */
-export function layoutWithin(aspects: number[], width: number, available: number, maxRows: number, gap = DEFAULT_GAP): JustifiedLayout {
-  const natural = layoutJustifiedA4(aspects, width, { gap });
-  if (available <= 0) return natural;
-  const targets = [natural.targetRowHeight];
-  const steps = 16;
-  for (let step = 0; step <= steps; step++) targets.push(48 + ((Math.max(available, natural.targetRowHeight) - 48) * step) / steps);
-
-  let best = natural;
-  let bestScore = Number.NEGATIVE_INFINITY;
-  for (const targetRowHeight of targets) {
-    const trial = layoutJustifiedA4(aspects, width, { gap, targetRowHeight });
-    const count = Math.min(maxRows, trial.rows.length);
-    const height = blockHeight(trial, count);
-    if (count === 0 || height > available) continue;
-    const band = count >= Math.min(5, maxRows) && count <= maxRows ? 2 : 1;
-    const score = band * 1_000_000 + count * 10_000 + height;
-    if (score > bestScore) {
-      best = trial;
-      bestScore = score;
-    }
-  }
-  return best;
-}
-
 export function layoutJustifiedA4(aspectsIn: number[], containerWidth: number, options: JustifiedOptions = {}): JustifiedLayout {
   const aspects = aspectsIn.map(sanitize);
   const gap = options.gap ?? DEFAULT_GAP;
@@ -232,7 +185,7 @@ export function layoutJustifiedA4(aspectsIn: number[], containerWidth: number, o
     return { width, height: 0, gap, targetRowHeight: safeTarget, rows: [], items };
   }
 
-  const maxCount = Math.max(2, Math.min(14, Math.ceil(portraits * 2) + 1));
+  const maxCount = Math.max(2, Math.round(portraits));
   const dp = new Array<number>(n + 1).fill(Number.POSITIVE_INFINITY);
   const choice = new Array<number>(n + 1).fill(0);
   dp[0] = 0;

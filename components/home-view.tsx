@@ -8,7 +8,7 @@ import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "re
 import type { Swiper as SwiperInstance } from "swiper";
 import { EffectCoverflow, Navigation } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { a4AspectRatio, layoutJustifiedA4, layoutWithin } from "@/lib/justified-a4";
+import { a4AspectRatio, layoutJustifiedA4 } from "@/lib/justified-a4";
 import { ContactSection } from "./contact-section";
 import { PlusIcon, mediaUrl, sectionVisible, youtubeIdFrom, type HomeContent, type NewsletterContent, type SiteContent } from "./content";
 
@@ -40,8 +40,11 @@ const rowsPerPage = 6;
 function NewsletterStage({ headlines, items }: { headlines: HomeContent["headlines"]; items: NewsletterContent[] }) {
   const router = useRouter();
   const rootRef = useRef<HTMLDivElement>(null);
+  const pinRef = useRef<HTMLDivElement>(null);
+  const tailRef = useRef<HTMLDivElement>(null);
   const cloudRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const blockRef = useRef(0);
   const cardRefs = useRef<Array<HTMLAnchorElement | null>>([]);
   const pagesRef = useRef(1);
   const measureRef = useRef<() => void>(() => {});
@@ -51,8 +54,9 @@ function NewsletterStage({ headlines, items }: { headlines: HomeContent["headlin
 
   useLayoutEffect(() => {
     const root = rootRef.current;
+    const pin = pinRef.current;
     const cloud = cloudRef.current;
-    if (!root || !cloud) return;
+    if (!root || !pin || !cloud) return;
     const cards = cardRefs.current.filter((card): card is HTMLAnchorElement => Boolean(card));
     if (!cards.length) return;
 
@@ -64,8 +68,6 @@ function NewsletterStage({ headlines, items }: { headlines: HomeContent["headlin
       hasMore: false,
     };
     let openProgress = () => 0;
-    let fittedTarget = 0;
-    let fittedWidth = 0;
 
     const measure = () => {
       const fontSize = Number.parseFloat(getComputedStyle(document.documentElement).fontSize);
@@ -79,15 +81,12 @@ function NewsletterStage({ headlines, items }: { headlines: HomeContent["headlin
       });
       const button = buttonRef.current;
       const buttonHeight = Math.max(button?.offsetHeight || 0, gap * 3);
-      if (Math.abs(inner - fittedWidth) > 1) {
-        fittedWidth = inner;
-        fittedTarget = 0;
-      }
+      const layout = layoutJustifiedA4(aspects, inner, { gap });
       const room = Math.max(gap * 8, view - buttonHeight - gap);
-      if (!fittedTarget) fittedTarget = layoutWithin(aspects, inner, room, rowsPerPage, gap).targetRowHeight;
-      const layout = layoutJustifiedA4(aspects, inner, { gap, targetRowHeight: fittedTarget });
-      const limit = pagesRef.current * rowsPerPage;
-      const shownRows = Math.min(layout.rows.length, limit);
+      let shownRows = Math.min(layout.rows.length, pagesRef.current * rowsPerPage);
+      if (pagesRef.current === 1) {
+        while (shownRows > 1 && layout.rows[shownRows - 1].top + layout.rows[shownRows - 1].height > room) shownRows -= 1;
+      }
       const onStage = aspects.map(() => false);
       layout.rows.slice(0, shownRows).forEach((row) => {
         row.items.forEach((item) => {
@@ -96,9 +95,12 @@ function NewsletterStage({ headlines, items }: { headlines: HomeContent["headlin
       });
       const block = shownRows ? layout.rows[shownRows - 1].top + layout.rows[shownRows - 1].height : 0;
       const hasMore = shownRows < layout.rows.length;
-      const stageHeight = Math.max(view, block + gap + (hasMore ? buttonHeight + gap : gap));
-      root.style.height = `${stageHeight}px`;
-      root.style.overflow = "visible";
+      blockRef.current = block;
+      const tail = tailRef.current;
+      if (tail) {
+        const contentBottom = block + gap + (hasMore ? buttonHeight + gap : gap);
+        tail.style.height = `${Math.max(0, contentBottom - view)}px`;
+      }
       layout.items.forEach((item) => {
         const card = cards[item.index];
         if (!card) return;
@@ -158,7 +160,7 @@ function NewsletterStage({ headlines, items }: { headlines: HomeContent["headlin
 
       const timeline = gsap.timeline({
         scrollTrigger: {
-          trigger: root,
+          trigger: pin,
           start: "top top",
           end: () => `+=${Math.round(window.innerHeight * 3.8)}`,
           scrub: 0.5,
@@ -262,7 +264,7 @@ function NewsletterStage({ headlines, items }: { headlines: HomeContent["headlin
   return (
     <section id="newsletter-section">
       <div ref={rootRef} className="relative bg-background" style={{ minHeight: "100vh" }}>
-        <div className="relative flex h-screen w-full items-center justify-center">
+        <div ref={pinRef} className="relative flex h-screen w-full items-center justify-center overflow-visible">
           {shownLines.map((line, index) => (
             <div key={line.title} className={headlineClass[index]}>
               <h1 className="text-5xl sm:text-7xl md:text-9xl font-bold text-foreground tracking-wide">{line.title}</h1>
@@ -301,20 +303,26 @@ function NewsletterStage({ headlines, items }: { headlines: HomeContent["headlin
               );
             })}
           </div>
+          <button
+            ref={buttonRef}
+            type="button"
+            onClick={() => {
+              const pin = pinRef.current;
+              const previous = blockRef.current;
+              pagesRef.current += 1;
+              measureRef.current();
+              ScrollTrigger.refresh();
+              const trigger = ScrollTrigger.getAll().find((entry) => entry.trigger === pin);
+              const end = trigger?.end ?? window.scrollY;
+              window.scrollTo({ top: end + Math.max(0, previous - window.innerHeight * 0.25), behavior: "smooth" });
+            }}
+            className="absolute left-1/2 z-30 -translate-x-1/2 border border-brand-orange px-6 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-brand-orange transition-opacity duration-300 hover:bg-brand-orange/10"
+            style={{ opacity: 0, pointerEvents: "none" }}
+          >
+            Load more
+          </button>
         </div>
-        <button
-          ref={buttonRef}
-          type="button"
-          onClick={() => {
-            pagesRef.current += 1;
-            measureRef.current();
-            ScrollTrigger.refresh();
-          }}
-          className="absolute left-1/2 z-30 -translate-x-1/2 border border-brand-orange px-6 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-brand-orange transition-opacity duration-300 hover:bg-brand-orange/10"
-          style={{ opacity: 0, pointerEvents: "none" }}
-        >
-          Load more
-        </button>
+        <div ref={tailRef} />
       </div>
     </section>
   );
