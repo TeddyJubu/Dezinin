@@ -481,13 +481,13 @@ export function HomeView({
 
   return (
     <main className="flex flex-col min-h-screen overflow-x-hidden">
-      {sectionVisible(home.showHero) && <section id="hero" className="relative h-screen">
+      {sectionVisible(home.showHero) && <section id="hero" className="relative z-10 h-screen">
         <div className="relative w-full h-full overflow-hidden">
           <div className="absolute inset-0 z-0">
             <video autoPlay muted loop playsInline preload="metadata" poster={heroPoster(home.heroVideo)} className="absolute top-1/2 left-1/2 min-w-full min-h-full w-auto h-auto -translate-x-1/2 -translate-y-1/2 object-cover">
               <source src={mediaUrl(home.heroVideo)} type="video/mp4" />
             </video>
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
+            <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
           </div>
         </div>
       </section>}
