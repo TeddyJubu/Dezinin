@@ -82,11 +82,8 @@ function NewsletterStage({ headlines, items }: { headlines: HomeContent["headlin
       const button = buttonRef.current;
       const buttonHeight = Math.max(button?.offsetHeight || 0, gap * 3);
       const layout = layoutJustifiedA4(aspects, inner, { gap });
-      const room = Math.max(gap * 8, view - buttonHeight - gap);
-      let shownRows = Math.min(layout.rows.length, pagesRef.current * rowsPerPage);
-      if (pagesRef.current === 1) {
-        while (shownRows > 1 && layout.rows[shownRows - 1].top + layout.rows[shownRows - 1].height > room) shownRows -= 1;
-      }
+      const pageRows = pagesRef.current === 1 ? 6 : pagesRef.current * rowsPerPage;
+      const shownRows = Math.min(layout.rows.length, pageRows);
       const onStage = aspects.map(() => false);
       layout.rows.slice(0, shownRows).forEach((row) => {
         row.items.forEach((item) => {
@@ -115,9 +112,7 @@ function NewsletterStage({ headlines, items }: { headlines: HomeContent["headlin
       }));
       if (button) {
         button.setAttribute("aria-hidden", hasMore ? "false" : "true");
-        const underGrid = block + gap;
-        const atBottom = Math.max(gap, view - buttonHeight - gap);
-        button.style.top = `${pagesRef.current > 1 ? underGrid : Math.max(underGrid, atBottom)}px`;
+        button.style.top = `${block + gap}px`;
       }
       if (openProgress() > 0.85) {
         cards.forEach((card, index) => {
