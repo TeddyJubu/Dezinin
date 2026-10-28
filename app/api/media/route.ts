@@ -1,7 +1,7 @@
 import { del } from "@vercel/blob";
 import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
 import { editorIsSignedIn } from "@/lib/editor-session";
-import { isUploadedMedia, mediaLibrary } from "@/lib/media-library";
+import { browseMedia, isUploadedMedia, mediaLibrary } from "@/lib/media-library";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -24,25 +24,21 @@ export async function GET(request: Request) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
   const url = new URL(request.url);
-  const directory = url.searchParams.get("directory") || "";
-  if (directory) return Response.json({ items: [], nextOffset: null });
-  const offset = Number(url.searchParams.get("offset") || 0);
   const limit = Math.min(Math.max(Number(url.searchParams.get("limit") || 36), 1), 100);
-  const search = (url.searchParams.get("search") || "").toLowerCase();
   const extensions = (url.searchParams.get("ext") || "")
     .split(",")
     .map((extension) => extension.trim().toLowerCase().replace(/^\./, ""))
     .filter(Boolean);
-  const files = (await mediaLibrary()).filter((file) => {
-    if (search && !file.filename.toLowerCase().includes(search)) return false;
-    if (!extensions.length) return true;
-    const extension = file.filename.split(".").pop()?.toLowerCase() || "";
-    return extensions.includes(extension);
-  });
-  return Response.json({
-    items: files.slice(offset, offset + limit),
-    nextOffset: offset + limit < files.length ? offset + limit : null,
-  });
+  return Response.json(
+    browseMedia(await mediaLibrary(), {
+      directory: url.searchParams.get("directory") || "",
+      offset: Number(url.searchParams.get("offset") || 0),
+      limit,
+      search: url.searchParams.get("search") || "",
+      extensions,
+      filesOnly: url.searchParams.get("filesOnly") === "true",
+    }),
+  );
 }
 
 export async function POST(request: Request) {

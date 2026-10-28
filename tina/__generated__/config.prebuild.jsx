@@ -1096,6 +1096,13 @@ function safeName(name) {
   const cleaned = base.replace(/[^A-Za-z0-9._-]+/g, "-").replace(/^[-.]+/, "");
   return cleaned.slice(0, 120) || "file";
 }
+function uploadFolder(file, directory) {
+  const chosen = directory.replace(/^\/+|\/+$/g, "");
+  if (chosen && chosen.split("/").every((part) => part && part !== "." && part !== "..")) return chosen;
+  if (file.type === "application/pdf") return "pdf";
+  if (file.type.startsWith("video/")) return "video";
+  return "images";
+}
 function mediaItem(filename, src, directory) {
   return {
     type: "file",
@@ -1113,17 +1120,20 @@ function mediaItem(filename, src, directory) {
 var DezininMediaStore = class {
   constructor() {
     this.accept = "image/*,video/mp4,video/webm,video/quicktime,application/pdf";
+    this.searchable = true;
+    this.extensionFilterable = true;
   }
   async persist(files) {
     const saved = [];
     for (const entry of files) {
       const filename = safeName(entry.file.name);
-      const blob = await upload(`media/${filename}`, entry.file, {
+      const directory = uploadFolder(entry.file, entry.directory);
+      const blob = await upload(`media/${directory}/${filename}`, entry.file, {
         access: "public",
         handleUploadUrl: "/api/media",
         multipart: entry.file.size > 8 * 1024 * 1024
       });
-      saved.push(mediaItem(filename, blob.url, entry.directory || ""));
+      saved.push(mediaItem(filename, blob.url, directory));
     }
     return saved;
   }
@@ -1134,6 +1144,7 @@ var DezininMediaStore = class {
     if (options.limit) params.set("limit", String(options.limit));
     if (options.search) params.set("search", options.search);
     if (options.ext?.length) params.set("ext", options.ext.join(","));
+    if (options.filesOnly) params.set("filesOnly", "true");
     const response = await fetch(`/api/media?${params}`);
     if (response.status === 401) throw new Error("You don't have access to this resource.");
     if (!response.ok) throw new Error("Could not load media.");
