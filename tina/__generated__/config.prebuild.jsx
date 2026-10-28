@@ -495,6 +495,9 @@ html, body.tina-tailwind {
 .tina-tailwind [data-test="list-partners"] > div > div > div > .text-center {
   grid-column: 1 / -1;
 }
+.tina-tailwind div.flex.flex-1.flex-row.gap-2.items-end.w-full:has(a[href="https://tina.io/docs/r/content-search"]) {
+  display: none !important;
+}
 .tina-tailwind div.relative.w-full.max-w-full.flex.justify-start.items-start.gap-3 > button.flex-shrink.min-w-0:has(img) {
   position: relative;
 }
@@ -724,6 +727,7 @@ function rewriteText(node) {
   let next = text.nodeValue || "";
   if (/llama|🦙/i.test(next)) next = "Opening DEZININ";
   for (const [from, to] of PHRASES) next = next.split(from).join(to);
+  if (next.trim() === "Add File" && parent.matches("a[href^='#/collections/new/']")) next = "Create New";
   if (next !== text.nodeValue) text.nodeValue = next;
 }
 function fileName(src) {

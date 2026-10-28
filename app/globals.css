@@ -33,10 +33,59 @@ body {
   }
 }
 
+.partner-viewport {
+  width: 100%;
+  overflow: hidden;
+  padding: 2rem 0;
+}
+
 .partner-marquee {
+  display: flex;
+  width: max-content;
   animation: partner-scroll 40s linear infinite;
 }
 
 .partner-marquee:hover {
   animation-play-state: paused;
+}
+
+.partner-set {
+  display: flex;
+}
+
+.partner-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 200px;
+  min-width: 200px;
+  padding: 0 0.75rem;
+}
+
+.partner-logo img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  object-fit: contain;
+}
+
+@media (max-width: 1023px) {
+  .partner-logo {
+    width: 160px;
+    min-width: 160px;
+  }
+}
+
+@media (max-width: 639px) {
+  .partner-logo {
+    width: 120px;
+    min-width: 120px;
+    padding: 0 0.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .partner-marquee {
+    animation: none;
+  }
 }

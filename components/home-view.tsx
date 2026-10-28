@@ -405,13 +405,17 @@ export function HomeView({
         <NewsletterStage headlines={home.headlines} items={newsletters} />
       )}
 
-      {sectionVisible(home.showPartners) && <section id="partner-slider" className="bg-brand-black py-2 md:py-6 my-8 md:my-28">
-        <div className="mx-auto max-w-6xl px-4">
-          <h3 className="text-3xl md:text-5xl mb-10 md:mb-16 font-semibold text-foreground text-center">{home.experienceTitle}</h3>
-          <div className="grid" style={{ gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: "2.5rem 1.5rem" }}>
-            {partners.map((logo) => (
-              <div key={logo} className="flex items-center justify-center">
-                <img alt="" src={mediaUrl(logo)} loading="lazy" decoding="async" fetchPriority="low" className="w-auto max-w-full object-contain" style={{ height: "clamp(4.5rem, 8vw, 8rem)" }} />
+      {sectionVisible(home.showPartners) && partners.length > 0 && <section id="partner-slider" className="bg-brand-black py-2 md:py-6 my-8 md:my-28">
+        <h3 className="text-3xl md:text-5xl mb-2 font-semibold text-foreground text-center">{home.experienceTitle}</h3>
+        <div className="partner-viewport">
+          <div className="partner-marquee">
+            {[0, 1].map((copy) => (
+              <div key={copy} className="partner-set" aria-hidden={copy === 1 || undefined}>
+                {partners.map((logo) => (
+                  <div key={logo} className="partner-logo">
+                    <img alt="" src={mediaUrl(logo)} loading="lazy" decoding="async" />
+                  </div>
+                ))}
               </div>
             ))}
           </div>
