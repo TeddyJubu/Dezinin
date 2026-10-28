@@ -7,6 +7,7 @@ import { Footer, Header, ThemeToggle } from "@/components/chrome";
 import { ContactSection } from "@/components/contact-section";
 import { ArrowUpRight, Shell, mediaUrl, type HomeContent, type NewsletterContent, type PageContent, type SiteContent, type TinaQuery } from "@/components/content";
 import { HomeView } from "@/components/home-view";
+import { LookbookListing } from "@/components/lookbook-listing";
 
 function primaryForm(query: TinaQuery) {
   const id = hashFromQuery(JSON.stringify({ query: query.query, variables: query.variables }));
@@ -99,34 +100,11 @@ export function NewsletterClient({
   const newsletterResult = useTina(primaryForm(newsletter));
   const siteData = siteResult.data.site as SiteContent;
   const data = newsletterResult.data.newsletter as NewsletterContent;
-  const pdf = mediaUrl(data.pdf);
 
   return (
     <Shell>
       <Header site={siteData} />
-      <main className="lookbook-stage bg-background">
-        <div className="container mx-auto shrink-0 px-4 py-4">
-          <h1 className="text-3xl md:text-4xl font-bold">{data.title}</h1>
-          {data.summary ? <p className="mt-2 max-w-3xl text-sm text-muted-foreground">{data.summary}</p> : null}
-        </div>
-        {pdf ? (
-          <iframe title={data.title || "Lookbook"} src={`${pdf}#toolbar=1&navpanes=0&view=FitV`} className="lookbook-frame" />
-        ) : (
-          <img src={mediaUrl(data.cover)} alt={data.title || ""} className="lookbook-frame object-contain" />
-        )}
-        <div className="fixed bottom-8 right-8 z-50 flex flex-col gap-3">
-          {pdf ? (
-            <a href={pdf} download className="group relative bg-brand-orange text-white rounded-full shadow-lg flex items-center overflow-hidden w-14 h-14 hover:w-auto hover:pr-6">
-              <span className="w-14 h-14 flex items-center justify-center flex-shrink-0">↓</span>
-              <span className="font-medium whitespace-nowrap pr-2 opacity-0 max-w-0 group-hover:opacity-100 group-hover:max-w-xs transition-all duration-300">Download</span>
-            </a>
-          ) : null}
-          <Link href="/contact-us" prefetch={true} className="group relative bg-zinc-800/80 backdrop-blur-md border border-white/20 text-white rounded-full shadow-lg flex items-center overflow-hidden w-14 h-14 hover:w-auto hover:pr-6">
-            <span className="w-14 h-14 flex items-center justify-center flex-shrink-0">✉</span>
-            <span className="font-medium whitespace-nowrap pr-2 opacity-0 max-w-0 group-hover:opacity-100 group-hover:max-w-xs transition-all duration-300">Enquiry</span>
-          </Link>
-        </div>
-      </main>
+      <LookbookListing item={data} />
       <Footer site={siteData} />
       <ThemeToggle />
     </Shell>
