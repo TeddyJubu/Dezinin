@@ -517,10 +517,48 @@ html, body.tina-tailwind {
   transition: opacity 0.2s var(--dezinin-ease), visibility 0.2s var(--dezinin-ease);
 }
 .tina-tailwind div.relative.w-full.max-w-full.flex.justify-start.items-start.gap-3 > button.flex-shrink.min-w-0:hover .dezinin-image-actions,
-.tina-tailwind div.relative.w-full.max-w-full.flex.justify-start.items-start.gap-3 > button.flex-shrink.min-w-0:focus-within .dezinin-image-actions {
+.tina-tailwind div.relative.w-full.max-w-full.flex.justify-start.items-start.gap-3 > button.flex-shrink.min-w-0:focus-within .dezinin-image-actions,
+.tina-tailwind button.dezinin-file-card:hover .dezinin-image-actions,
+.tina-tailwind button.dezinin-file-card:focus-within .dezinin-image-actions {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
+}
+.tina-tailwind button.dezinin-file-card {
+  position: relative;
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 4.75rem;
+  padding: 0.85rem 1rem;
+  border-radius: 0.85rem !important;
+  border: 1px solid #2a2422 !important;
+  background: #161311 !important;
+  text-align: left;
+}
+.tina-tailwind div.relative.w-full.max-w-full.flex.justify-start.items-center.gap-2 > button.icon-parent.rounded-full {
+  display: none !important;
+}
+.tina-tailwind button.dezinin-file-card .w-12 {
+  background: #120f0e !important;
+  border-color: #3a3330 !important;
+  box-shadow: none !important;
+}
+.tina-tailwind button.dezinin-file-card span.text-gray-500 {
+  color: #f7f1ea !important;
+}
+.tina-tailwind button.dezinin-file-card .dezinin-image-actions {
+  inset: auto 0.7rem auto auto;
+  width: auto;
+  height: auto;
+  transform: translateY(-50%);
+  top: 50%;
+  padding: 0;
+  background: transparent;
+  gap: 0.45rem;
+}
+.tina-tailwind button.dezinin-file-card:hover span.text-gray-500,
+.tina-tailwind button.dezinin-file-card:focus-within span.text-gray-500 {
+  padding-right: 5.6rem;
 }
 .tina-tailwind .dezinin-image-action {
   width: 2.25rem;
@@ -951,6 +989,7 @@ function keepSingletonBackInEditor(event, cms) {
   window.location.hash = DASHBOARD;
 }
 var IMAGE_PREVIEW_ROW = "div.relative.w-full.max-w-full.flex.justify-start.items-start.gap-3";
+var FILE_PREVIEW_ROW = "div.relative.w-full.max-w-full.flex.justify-start.items-center.gap-2";
 function imageActionIcon(kind) {
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   svg.setAttribute("viewBox", "0 0 24 24");
@@ -985,6 +1024,14 @@ function imageClearButton(preview) {
   if (sibling) return sibling;
   return preview.closest('[aria-roledescription="sortable"]')?.querySelector(":scope > button") ?? null;
 }
+function attachMediaActions(preview, labels) {
+  if (preview.querySelector("[data-dezinin-image-actions]") || !imageClearButton(preview)) return;
+  const actions = document.createElement("span");
+  actions.className = "dezinin-image-actions";
+  actions.dataset.dezininImageActions = "";
+  actions.append(imageAction("delete", labels.delete), imageAction("upload", labels.upload));
+  preview.appendChild(actions);
+}
 function mountImageActions() {
   document.querySelectorAll(IMAGE_PREVIEW_ROW).forEach((row) => {
     const preview = row.querySelector(":scope > button.flex-shrink.min-w-0");
@@ -994,12 +1041,18 @@ function mountImageActions() {
       existing?.remove();
       return;
     }
-    if (existing) return;
-    const actions = document.createElement("span");
-    actions.className = "dezinin-image-actions";
-    actions.dataset.dezininImageActions = "";
-    actions.append(imageAction("delete", "Remove image"), imageAction("upload", "Upload image"));
-    preview.appendChild(actions);
+    attachMediaActions(preview, { delete: "Remove image", upload: "Upload image" });
+  });
+  document.querySelectorAll(FILE_PREVIEW_ROW).forEach((row) => {
+    const preview = row.querySelector(":scope > button.flex-shrink.min-w-0");
+    const existing = preview?.querySelector("[data-dezinin-image-actions]");
+    if (!preview?.querySelector(".w-12") || !imageClearButton(preview)) {
+      existing?.remove();
+      preview?.classList.remove("dezinin-file-card");
+      return;
+    }
+    preview.classList.add("dezinin-file-card");
+    attachMediaActions(preview, { delete: "Remove PDF", upload: "Upload PDF" });
   });
 }
 function onImageActionClick(event) {
