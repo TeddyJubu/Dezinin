@@ -605,6 +605,27 @@ function rewriteText(node: Node | null) {
   for (const [from, to] of PHRASES) next = next.split(from).join(to);
   if (next !== text.nodeValue) text.nodeValue = next;
 }
+
+function fileName(src: string) {
+  const trimmed = src.trim();
+  const name = trimmed.split(/[\\/]/).filter(Boolean).pop();
+  if (!name || name === trimmed) return trimmed;
+  try {
+    return decodeURIComponent(name);
+  } catch {
+    return name;
+  }
+}
+
+function shortenFileLabel(node: Node | null) {
+  if (!node || node.nodeType !== Node.TEXT_NODE) return;
+  const text = node as Text;
+  const parent = text.parentElement;
+  if (!parent?.matches("button.dezinin-file-card span.text-gray-500")) return;
+  const name = fileName(text.nodeValue || "");
+  if (name !== text.nodeValue) text.nodeValue = name;
+  if (parent.title !== name) parent.title = name;
+}
 function fieldRow(toggle: Element) {
   let node = toggle as HTMLElement;
   while (node.parentElement) {
@@ -1098,6 +1119,7 @@ function mountImageActions() {
       return;
     }
     preview.classList.add("dezinin-file-card");
+    preview.querySelectorAll("span.text-gray-500").forEach((span) => shortenFileLabel(span.firstChild));
     attachMediaActions(preview, { delete: "Remove PDF", upload: "Upload PDF" });
   });
 }
@@ -1164,7 +1186,10 @@ export function installDezininBrand<T>(cms: T): T {
   const observer = new MutationObserver((records) => {
     let structural = false;
     for (const record of records) {
-      if (record.type === "characterData") rewriteText(record.target as Text);
+      if (record.type === "characterData") {
+        rewriteText(record.target as Text);
+        shortenFileLabel(record.target);
+      }
       if (record.addedNodes.length) {
         structural = true;
         record.addedNodes.forEach((node) => rewriteTree(node as ParentNode));
