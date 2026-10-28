@@ -104,15 +104,15 @@ export function NewsletterClient({
   return (
     <Shell>
       <Header site={siteData} />
-      <main className="min-h-screen bg-background pt-20">
-        <div className="container mx-auto px-4 py-8">
-          <h1 className="text-4xl md:text-6xl font-bold">{data.title}</h1>
-          {data.summary ? <p className="mt-4 max-w-2xl text-muted-foreground">{data.summary}</p> : null}
+      <main className="lookbook-stage bg-background">
+        <div className="container mx-auto shrink-0 px-4 py-4">
+          <h1 className="text-3xl md:text-4xl font-bold">{data.title}</h1>
+          {data.summary ? <p className="mt-2 max-w-3xl text-sm text-muted-foreground">{data.summary}</p> : null}
         </div>
         {pdf ? (
-          <iframe title={data.title || "Lookbook"} src={pdf} className="w-full h-[calc(100vh-8rem)] border-0 bg-black" />
+          <iframe title={data.title || "Lookbook"} src={`${pdf}#toolbar=1&navpanes=0&view=FitV`} className="lookbook-frame" />
         ) : (
-          <img src={mediaUrl(data.cover)} alt={data.title || ""} className="mx-auto max-h-[70vh] object-contain" />
+          <img src={mediaUrl(data.cover)} alt={data.title || ""} className="lookbook-frame object-contain" />
         )}
         <div className="fixed bottom-8 right-8 z-50 flex flex-col gap-3">
           {pdf ? (

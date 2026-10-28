@@ -8,6 +8,22 @@ body {
   min-height: 100vh;
 }
 
+.lookbook-stage {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  padding-top: 5rem;
+}
+
+.lookbook-frame {
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 0;
+  border: 0;
+  background: #000;
+}
+
 @keyframes partner-scroll {
   from {
     transform: translateX(0);

@@ -28,6 +28,9 @@ async function tina() {
     return client;
   }
   const { client } = await import("@/tina/__generated__/client");
+  if (typeof window === "undefined" && client.apiUrl.startsWith("/")) {
+    client.apiUrl = `http://127.0.0.1:${process.env.PORT || "3000"}${client.apiUrl}`;
+  }
   return client;
 }
 
