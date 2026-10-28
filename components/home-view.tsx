@@ -36,7 +36,7 @@ function scatter(index: number, mobile: boolean) {
 
 function NewsletterStage({ headlines, items }: { headlines: HomeContent["headlines"]; items: NewsletterContent[] }) {
   const router = useRouter();
-  const rootRef = useRef<HTMLElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
   const cloudRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<Array<HTMLAnchorElement | null>>([]);
   const signature = items.map((item) => item._sys?.filename || item.title || "").join("\n");
