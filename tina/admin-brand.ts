@@ -77,6 +77,22 @@ html, body.tina-tailwind {
 .tina-tailwind .text-gray-400 {
   color: #a39e9b !important;
 }
+.tina-tailwind .from-orange-50\/60 {
+  --tw-gradient-from: #3a2822 var(--tw-gradient-from-position);
+  --tw-gradient-to: #1a1614 var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+.tina-tailwind .bg-white\/60 {
+  background-color: #120f0e !important;
+}
+.tina-tailwind .bg-white\/60.text-gray-700,
+.tina-tailwind h3.text-gray-400,
+.tina-tailwind .font-bold.text-gray-500 {
+  color: #f7f1ea !important;
+}
+.tina-tailwind button.bg-white .bg-gray-50 {
+  background-color: #f4efe9 !important;
+}
 .tina-tailwind .border-gray-100,
 .tina-tailwind .border-gray-200,
 .tina-tailwind .border-gray-300,
