@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { mediaUrl, type NewsletterContent } from "./content";
@@ -98,7 +97,7 @@ export function LookbookListing({ item }: { item: NewsletterContent }) {
 
   return (
     <main className="min-h-screen bg-background px-4 pb-16 pt-24 md:px-8">
-      <section className="lookbook-sheet mx-auto">
+      <section className="lookbook-sheet mx-auto" style={portrait ? { ["--page-ratio" as string]: String(ratio) } : undefined}>
         <div className={portrait ? "lookbook-visual is-portrait" : "lookbook-visual"}>
           <figure className="relative">
             {shown ? (
@@ -128,12 +127,12 @@ export function LookbookListing({ item }: { item: NewsletterContent }) {
             ) : null}
           </figure>
           {count > 0 ? (
-            <div className="lookbook-rail flex items-center gap-3 border-t border-white/10 px-4 py-3">
+            <div className="lookbook-rail flex items-center gap-3 border-t border-border px-4 py-3">
               <button
                 type="button"
                 aria-label="Previous pages"
                 onClick={() => scrollStrip(-1)}
-                className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-white/10 text-foreground"
+                className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-border text-foreground"
               >
                 <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                   <path d={portrait ? "m6 15 6-6 6 6" : "M15 6 9 12l6 6"} />
@@ -158,7 +157,7 @@ export function LookbookListing({ item }: { item: NewsletterContent }) {
                 type="button"
                 aria-label="Next pages"
                 onClick={() => scrollStrip(1)}
-                className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-white/10 text-foreground"
+                className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-border text-foreground"
               >
                 <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                   <path d={portrait ? "m6 9 6 6 6-6" : "m9 6 6 6-6 6"} />
@@ -186,12 +185,12 @@ export function LookbookListing({ item }: { item: NewsletterContent }) {
             <p className="mt-6 text-xs uppercase tracking-[0.2em] text-zinc-500">{pageLabel(count)}</p>
           </div>
           <div className="mt-8 flex flex-col gap-3">
-            <Link href="/contact-us" className="inline-flex h-11 items-center justify-center rounded-full border border-white/10 text-sm uppercase tracking-[0.2em] text-foreground transition-colors hover:border-brand-orange hover:text-brand-orange">
+            <a href="mailto:info@dezinin.com" className="inline-flex h-11 items-center justify-center rounded-full border border-white/10 text-sm uppercase tracking-[0.2em] text-foreground transition-colors hover:border-brand-orange hover:text-brand-orange">
               Enquiry
-            </Link>
+            </a>
             {pdf ? (
-              <a href={pdf} download className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-brand-orange text-sm uppercase tracking-[0.2em] text-white">
-                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+              <a href={pdf} download className="lookbook-download inline-flex items-center justify-center gap-2 rounded-full bg-brand-orange text-sm uppercase text-white">
+                <svg viewBox="0 0 24 24" className="h-4 w-4 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                   <path d="M12 4v10" />
                   <path d="m8 10 4 4 4-4" />
                   <path d="M5 19h14" />

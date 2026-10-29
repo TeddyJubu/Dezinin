@@ -297,25 +297,25 @@ function NewsletterStage({ headlines, items }: { headlines: HomeContent["headlin
                 </Link>
               );
             })}
+            <button
+              ref={buttonRef}
+              type="button"
+              onClick={() => {
+                const pin = pinRef.current;
+                const previous = blockRef.current;
+                pagesRef.current += 1;
+                measureRef.current();
+                ScrollTrigger.refresh();
+                const trigger = ScrollTrigger.getAll().find((entry) => entry.trigger === pin);
+                const end = trigger?.end ?? window.scrollY;
+                window.scrollTo({ top: end + Math.max(0, previous - window.innerHeight * 0.25), behavior: "smooth" });
+              }}
+              className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap border border-brand-orange px-6 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-brand-orange transition-opacity duration-300 hover:bg-brand-orange/10"
+              style={{ opacity: 0, pointerEvents: "none", zIndex: 20 }}
+            >
+              Load more
+            </button>
           </div>
-          <button
-            ref={buttonRef}
-            type="button"
-            onClick={() => {
-              const pin = pinRef.current;
-              const previous = blockRef.current;
-              pagesRef.current += 1;
-              measureRef.current();
-              ScrollTrigger.refresh();
-              const trigger = ScrollTrigger.getAll().find((entry) => entry.trigger === pin);
-              const end = trigger?.end ?? window.scrollY;
-              window.scrollTo({ top: end + Math.max(0, previous - window.innerHeight * 0.25), behavior: "smooth" });
-            }}
-            className="absolute left-1/2 z-30 -translate-x-1/2 border border-brand-orange px-6 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-brand-orange transition-opacity duration-300 hover:bg-brand-orange/10"
-            style={{ opacity: 0, pointerEvents: "none" }}
-          >
-            Load more
-          </button>
         </div>
         <div ref={tailRef} />
       </div>
