@@ -92,9 +92,11 @@ export function PageClient({ page, site }: { page: TinaQuery; site: TinaQuery })
 export function NewsletterClient({
   newsletter,
   site,
+  others,
 }: {
   newsletter: TinaQuery;
   site: TinaQuery;
+  others: NewsletterContent[];
 }) {
   const siteResult = useTina(site);
   const newsletterResult = useTina(primaryForm(newsletter));
@@ -104,7 +106,7 @@ export function NewsletterClient({
   return (
     <Shell>
       <Header site={siteData} />
-      <LookbookListing item={data} />
+      <LookbookListing item={data} others={others} />
       <Footer site={siteData} />
       <ThemeToggle />
     </Shell>

@@ -1,7 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { a4AspectRatio, layoutJustifiedA4, type JustifiedLayout } from "@/lib/justified-a4";
 import { mediaUrl, type NewsletterContent } from "./content";
 
 function pageLabel(total: number) {
@@ -9,7 +11,76 @@ function pageLabel(total: number) {
   return `Presentation · ${total} ${total === 1 ? "page" : "pages"}`;
 }
 
-export function LookbookListing({ item }: { item: NewsletterContent }) {
+function LookbookSuggestions({ items }: { items: NewsletterContent[] }) {
+  const rootRef = useRef<HTMLDivElement>(null);
+  const [aspects, setAspects] = useState<number[]>(() => items.map(() => a4AspectRatio(210, 297)));
+  const [layout, setLayout] = useState<JustifiedLayout | null>(null);
+
+  useLayoutEffect(() => {
+    const root = rootRef.current;
+    if (!root || !items.length) return;
+    const measure = () => {
+      const fontSize = Number.parseFloat(getComputedStyle(document.documentElement).fontSize);
+      const gap = (Number.isFinite(fontSize) && fontSize > 0 ? fontSize : 16) * 0.75;
+      setLayout(layoutJustifiedA4(aspects, root.clientWidth, { gap }));
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(root);
+    return () => observer.disconnect();
+  }, [aspects, items.length]);
+
+  if (!items.length) return null;
+
+  return (
+    <section className="mt-16" aria-label="Other lookbooks">
+      <p className="mb-6 text-xs font-semibold uppercase tracking-[0.2em] text-brand-orange">Other lookbooks</p>
+      <div ref={rootRef} className="relative" style={{ height: layout ? `${layout.height}px` : undefined }}>
+        {items.map((item, index) => {
+          const place = layout?.items[index];
+          const slug = item._sys?.filename || "";
+          return (
+            <Link
+              key={slug || item.title}
+              href={`/newsletters/${slug}`}
+              prefetch={false}
+              scroll
+              className="group absolute overflow-hidden bg-zinc-900"
+              style={
+                place
+                  ? { left: place.x, top: place.y, width: place.width, height: place.height }
+                  : { visibility: "hidden" }
+              }
+            >
+              <img
+                src={mediaUrl(item.cover)}
+                alt={item.title || ""}
+                className="h-full w-full object-contain"
+                decoding="async"
+                loading="lazy"
+                onLoad={(event) => {
+                  const image = event.currentTarget;
+                  const next = a4AspectRatio(image.naturalWidth, image.naturalHeight);
+                  setAspects((current) => {
+                    if (current[index] === next) return current;
+                    const copy = current.slice();
+                    copy[index] = next;
+                    return copy;
+                  });
+                }}
+              />
+              <div className="absolute bottom-0 left-0 right-0 flex h-1/2 items-end bg-gradient-to-t from-orange-400 to-transparent p-4 opacity-0 transition-opacity duration-300 ease-in-out group-hover:opacity-100">
+                <h3 className="text-lg font-bold leading-tight text-white drop-shadow-md">{item.title}</h3>
+              </div>
+            </Link>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+export function LookbookListing({ item, others = [] }: { item: NewsletterContent; others?: NewsletterContent[] }) {
   const router = useRouter();
   const stripRef = useRef<HTMLDivElement>(null);
   const pdf = mediaUrl(item.pdf);
@@ -201,6 +272,7 @@ export function LookbookListing({ item }: { item: NewsletterContent }) {
           </div>
         </div>
       </section>
+      <LookbookSuggestions key={others.map((entry) => entry._sys?.filename || entry.title || "").join("|")} items={others} />
       {expanded && shown ? (
         <div className="fixed inset-0 flex items-center justify-center bg-black p-6" style={{ zIndex: 90 }} onClick={() => setExpanded(false)}>
           <img src={shown} alt={item.title || ""} className="max-h-full max-w-full object-contain" onClick={(event) => event.stopPropagation()} />
