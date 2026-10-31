@@ -108,14 +108,13 @@ export function Header({ site }: { site: SiteContent }) {
         ))}
       </div>
       <div className="absolute top-1/2 -translate-y-1/2 right-4 sm:right-6 lg:right-8 flex items-center space-x-2">
-        <Link
-          href={site.ctaHref || "/contact-us"}
-          prefetch={true}
+        <a
+          href={site.ctaHref || "#site-footer"}
           className="hidden md:inline-flex text-brand-orange text-lg font-semibold rounded-full hover:bg-brand-orange/10 group items-center gap-1 h-9 px-4 py-2"
         >
           {site.ctaLabel || "LETS TALK"}
           <ArrowUpRight className="h-11 w-11 text-brand-orange transition-transform duration-300 group-hover:-translate-y-1 group-hover:translate-x-1" />
-        </Link>
+        </a>
         <button
           type="button"
           className="inline-flex md:hidden items-center justify-center h-10 w-10"
@@ -135,9 +134,9 @@ export function Header({ site }: { site: SiteContent }) {
               {link.label}
             </Link>
           ))}
-          <Link href={site.ctaHref || "/contact-us"} prefetch={true} className="text-brand-orange font-semibold" onClick={() => setOpen(false)}>
+          <a href={site.ctaHref || "#site-footer"} className="text-brand-orange font-semibold" onClick={() => setOpen(false)}>
             {site.ctaLabel || "LETS TALK"}
-          </Link>
+          </a>
         </div>
       ) : null}
     </header>
@@ -148,7 +147,7 @@ export function Footer({ site }: { site: SiteContent }) {
   const pathname = usePathname() || "/";
 
   return (
-    <footer className="w-full border-t bg-background px-4 py-9 sm:px-6">
+    <footer id="site-footer" className="w-full scroll-mt-20 border-t bg-background px-4 py-9 sm:px-6">
       <div className="container mx-auto grid grid-cols-1 gap-8 md:grid-cols-3">
         <div className="text-center md:text-left">
           <Link href="/" prefetch={true} scroll onClick={onHomeClick(pathname)} className="relative inline-block w-full max-w-[450px] h-[50px] mx-auto md:mx-0">
